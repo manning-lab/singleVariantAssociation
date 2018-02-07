@@ -6,4 +6,4 @@ RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; 
 RUN Rscript -e "install.packages('ggplot2')"
 
 RUN git clone https://github.com/manning-lab/singleVariantAssociation.git
-
+RUN cd ./singleVariantAssociation && git pull origin master

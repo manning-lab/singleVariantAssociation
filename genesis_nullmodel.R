@@ -26,10 +26,11 @@ outcome.type <-  input_args[4]
 covariate.string <- input_args[5]
 conditional.string <- input_args[6]
 ivars.string <- input_args[7]
-sample.file <- input_args[8]
-label <- input_args[9]
-kinship.matrix <- input_args[10]
-id.col <- input_args[11]
+group.var <- input_args[8]
+sample.file <- input_args[9]
+label <- input_args[10]
+kinship.matrix <- input_args[11]
+id.col <- input_args[12]
 
 # Load required libraries
 suppressMessages(library(SeqArray))
@@ -43,6 +44,13 @@ if (covariate.string == "NA"){
   covariates = c()
 } else {
   covariates <- unlist(strsplit(covariate.string,","))
+}
+
+# Check for group_var, heterogenous variances category to use
+if (!(group.var == "NA")){
+  if (!(group.var %in% covariates)){
+    covariates <- c(covariates,group.var)
+  }
 }
 
 # Check if we have ivars input, add to covars
@@ -157,11 +165,20 @@ sample.data.for.annotated <- data.frame(sample.id = phenotype.slim[,id.col],
 annotated.frame <- AnnotatedDataFrame(sample.data.for.annotated)
 
 # Fit the null model
-nullmod <- fitNullMM(scanData = scan.annotated.frame,
-                     outcome = outcome.name,
-                     covars = covariates,
-                     family = ifelse(tolower(outcome.type) == "dichotomous", "binomial", "gaussian"),
-                     covMatList = kinship)
+if (group.var == "NA"){
+  nullmod <- fitNullMM(scanData = scan.annotated.frame,
+                       outcome = outcome.name,
+                       covars = covariates,
+                       family = ifelse(tolower(outcome.type) == "dichotomous", "binomial", "gaussian"),
+                       covMatList = kinship)
+} else {
+  nullmod <- fitNullMM(scanData = scan.annotated.frame,
+                       outcome = outcome.name,
+                       covars = covariates,
+                       family = "gaussian",
+                       group.var = group.var,
+                       covMatList = kinship)
+}
 
 # Save the null model to the output file
 save(nullmod,annotated.frame,file=paste(label,"_null.RDa",sep=""))

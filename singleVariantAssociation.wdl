@@ -13,7 +13,7 @@ task conditionalPhenotype {
 	}
 
 	runtime {
-		docker: "tmajarian/single-var@sha256:a8c50394bf35a1a7a0f6456182e8155a6891d72a521400322d56e3b3b52efb4d"
+		docker: "tmajarian/single-var@sha256:6987e39c12c75779900412c4c838a636fae862b5f764d64e85571a152b33002e"
 		disks: "local-disk ${disk} SSD"
 		memory: "10G"
 	}
@@ -46,7 +46,7 @@ task fitNull {
 	}
 
 	runtime {
-		docker: "tmajarian/single-var@sha256:a8c50394bf35a1a7a0f6456182e8155a6891d72a521400322d56e3b3b52efb4d"
+		docker: "tmajarian/single-var@sha256:6987e39c12c75779900412c4c838a636fae862b5f764d64e85571a152b33002e"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory}G"
 	}
@@ -78,7 +78,7 @@ task assocTest {
 	}
 	
 	runtime {
-		docker: "tmajarian/single-var@sha256:a8c50394bf35a1a7a0f6456182e8155a6891d72a521400322d56e3b3b52efb4d"
+		docker: "tmajarian/single-var@sha256:6987e39c12c75779900412c4c838a636fae862b5f764d64e85571a152b33002e"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory}G"
 	}
@@ -93,7 +93,6 @@ task summary {
 	Float? pval_threshold
 	String label
 	Array[File] assoc
-	File script
 
 	Int memory
 	Int disk
@@ -103,7 +102,7 @@ task summary {
 	}
 	
 	runtime {
-		docker: "tmajarian/single-var@sha256:a8c50394bf35a1a7a0f6456182e8155a6891d72a521400322d56e3b3b52efb4d"
+		docker: "tmajarian/single-var@sha256:6987e39c12c75779900412c4c838a636fae862b5f764d64e85571a152b33002e"
   	    disks: "local-disk ${disk} SSD"
         memory: "${memory}G"
 	}
@@ -146,8 +145,6 @@ workflow w_assocTest {
 	Int this_memory
 	Int this_disk
 
-	call getScript
-
 	File null_genotype_file = these_genotype_files[0]
 
 	Boolean need_null = defined(this_null_file)
@@ -155,22 +152,22 @@ workflow w_assocTest {
 	if(defined(these_snps)) {
 
 		call conditionalPhenotype {
-			input: genotype_files = these_genotype_files, phenotype_file = this_phenotype_file, id_col = this_id_col, sample_file = this_sample_file, snps = these_snps, label = this_label, script = getScript.conditional_script, disk = this_disk
+			input: genotype_files = these_genotype_files, phenotype_file = this_phenotype_file, id_col = this_id_col, sample_file = this_sample_file, snps = these_snps, label = this_label, disk = this_disk
 		}
 		
 		call fitNull as fitNullConditional {
-			input: genotype_file = null_genotype_file, phenotype_file = conditionalPhenotype.new_phenotype_file, outcome_name = this_outcome_name, outcome_type = this_outcome_type, covariates_string = this_covariates_string, conditional_string = these_snps, ivars_string = this_ivars_string, group_var = this_group_var, sample_file = this_sample_file, label = this_label, kinship_matrix = this_kinship_matrix, id_col = this_id_col, script = getScript.null_script, memory = this_memory, disk = this_disk
+			input: genotype_file = null_genotype_file, phenotype_file = conditionalPhenotype.new_phenotype_file, outcome_name = this_outcome_name, outcome_type = this_outcome_type, covariates_string = this_covariates_string, conditional_string = these_snps, ivars_string = this_ivars_string, group_var = this_group_var, sample_file = this_sample_file, label = this_label, kinship_matrix = this_kinship_matrix, id_col = this_id_col, memory = this_memory, disk = this_disk
 		}
 
 		scatter(this_genotype_file in these_genotype_files) {
 		
 			call assocTest as assocTestConditional {
-				input: gds_file = this_genotype_file, null_file = fitNullConditional.model, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, script = getScript.assoc_script, memory = this_memory, disk = this_disk
+				input: gds_file = this_genotype_file, null_file = fitNullConditional.model, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, memory = this_memory, disk = this_disk
 			}
 		}
 
 		call summary as summaryConditional {
-			input: pval = this_pval, pval_threshold = this_pval_threshold, label = this_label, assoc = assocTestConditional.assoc, script = getScript.summary_script, memory = this_memory, disk = this_disk
+			input: pval = this_pval, pval_threshold = this_pval_threshold, label = this_label, assoc = assocTestConditional.assoc, memory = this_memory, disk = this_disk
 		}
 	}
 
@@ -179,18 +176,18 @@ workflow w_assocTest {
 		if(!need_null) {
 			
 			call fitNull {
-				input: genotype_file = null_genotype_file, phenotype_file = this_phenotype_file, outcome_name = this_outcome_name, outcome_type = this_outcome_type, covariates_string = this_covariates_string, conditional_string = these_snps, ivars_string = this_ivars_string, group_var = this_group_var, sample_file = this_sample_file, label = this_label, kinship_matrix = this_kinship_matrix, id_col = this_id_col, script = getScript.null_script, memory = this_memory, disk = this_disk
+				input: genotype_file = null_genotype_file, phenotype_file = this_phenotype_file, outcome_name = this_outcome_name, outcome_type = this_outcome_type, covariates_string = this_covariates_string, conditional_string = these_snps, ivars_string = this_ivars_string, group_var = this_group_var, sample_file = this_sample_file, label = this_label, kinship_matrix = this_kinship_matrix, id_col = this_id_col, memory = this_memory, disk = this_disk
 			}
 
 			scatter(this_genotype_file in these_genotype_files) {
 			
 				call assocTest {
-					input: gds_file = this_genotype_file, null_file = fitNull.model, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, script = getScript.assoc_script, memory = this_memory, disk = this_disk
+					input: gds_file = this_genotype_file, null_file = fitNull.model, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, memory = this_memory, disk = this_disk
 				}
 			}
 
 			call summary {
-				input: pval = this_pval, pval_threshold = this_pval_threshold, label = this_label, assoc = assocTest.assoc, script = getScript.summary_script, memory = this_memory, disk = this_disk
+				input: pval = this_pval, pval_threshold = this_pval_threshold, label = this_label, assoc = assocTest.assoc, memory = this_memory, disk = this_disk
 			}
 
 		} 
@@ -200,12 +197,12 @@ workflow w_assocTest {
 			scatter(this_genotype_file in these_genotype_files) {
 			
 				call assocTest as assocNull {
-					input: gds_file = this_genotype_file, null_file = this_null_file, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, script = getScript.assoc_script, memory = this_memory, disk = this_disk
+					input: gds_file = this_genotype_file, null_file = this_null_file, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, memory = this_memory, disk = this_disk
 				}
 			}
 
 			call summary as summaryNull {
-				input: pval = this_pval, pval_threshold = this_pval_threshold, label = this_label, assoc = assocNull.assoc, script = getScript.summary_script, memory = this_memory, disk = this_disk
+				input: pval = this_pval, pval_threshold = this_pval_threshold, label = this_label, assoc = assocNull.assoc, memory = this_memory, disk = this_disk
 			}
 		}
 	}

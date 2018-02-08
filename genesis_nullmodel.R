@@ -80,6 +80,9 @@ if (!(conditional.string == "NA")) {
 ## Load phenotype data
 phenotype.data <- fread(phenotype.file,header=T,stringsAsFactors=FALSE,showProgress=TRUE,data.table=FALSE)
 
+print(covariates)
+print(colnames(phenotype.data))
+
 # Correct the outcome column if we have a continuous variable
 if (outcome.type == "continuous"){
   phenotype.data[,outcome.name] <- as.numeric(phenotype.data[,outcome.name])

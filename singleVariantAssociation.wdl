@@ -13,7 +13,7 @@ task conditionalPhenotype {
 	}
 
 	runtime {
-		docker: "robbyjo/r-mkl-bioconductor@sha256:b88d8713824e82ed4ae2a0097778e7750d120f2e696a2ddffe57295d531ec8b2"
+		docker: "tmajarian/single-var@sha256:a8c50394bf35a1a7a0f6456182e8155a6891d72a521400322d56e3b3b52efb4d"
 		disks: "local-disk ${disk} SSD"
 		memory: "10G"
 	}
@@ -32,6 +32,7 @@ task fitNull {
 	String? covariates_string
 	String? conditional_string
 	String? ivars_string
+	String? group_var
 	File? sample_file
 	String label
 	File? kinship_matrix
@@ -41,11 +42,11 @@ task fitNull {
 	Int disk
 
 	command {
-		R --vanilla --args ${genotype_file} ${phenotype_file} ${outcome_name} ${outcome_type} ${default="NA" covariates_string} ${default="NA" conditional_string} ${default="NA" ivars_string} ${default="NA" sample_file} ${label} ${kinship_matrix} ${id_col} < /singleVariantAssociation/genesis_nullmodel.R
+		R --vanilla --args ${genotype_file} ${phenotype_file} ${outcome_name} ${outcome_type} ${default="NA" covariates_string} ${default="NA" conditional_string} ${default="NA" ivars_string} ${default="NA" group_var} ${default="NA" sample_file} ${label} ${kinship_matrix} ${id_col} < /singleVariantAssociation/genesis_nullmodel.R
 	}
 
 	runtime {
-		docker: "robbyjo/r-mkl-bioconductor@sha256:b88d8713824e82ed4ae2a0097778e7750d120f2e696a2ddffe57295d531ec8b2"
+		docker: "tmajarian/single-var@sha256:a8c50394bf35a1a7a0f6456182e8155a6891d72a521400322d56e3b3b52efb4d"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory}G"
 	}
@@ -77,7 +78,7 @@ task assocTest {
 	}
 	
 	runtime {
-		docker: "robbyjo/r-mkl-bioconductor@sha256:b88d8713824e82ed4ae2a0097778e7750d120f2e696a2ddffe57295d531ec8b2"
+		docker: "tmajarian/single-var@sha256:a8c50394bf35a1a7a0f6456182e8155a6891d72a521400322d56e3b3b52efb4d"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory}G"
 	}
@@ -102,7 +103,7 @@ task summary {
 	}
 	
 	runtime {
-		docker: "robbyjo/r-mkl-bioconductor@sha256:b88d8713824e82ed4ae2a0097778e7750d120f2e696a2ddffe57295d531ec8b2"
+		docker: "tmajarian/single-var@sha256:a8c50394bf35a1a7a0f6456182e8155a6891d72a521400322d56e3b3b52efb4d"
   	    disks: "local-disk ${disk} SSD"
         memory: "${memory}G"
 	}
@@ -126,6 +127,7 @@ workflow w_assocTest {
 	String? this_outcome_type
 	String? this_covariates_string
 	String? this_ivars_string
+	String? this_group_var
 	File? this_sample_file
 	String this_label
 	File? this_kinship_matrix
@@ -157,7 +159,7 @@ workflow w_assocTest {
 		}
 		
 		call fitNull as fitNullConditional {
-			input: genotype_file = null_genotype_file, phenotype_file = conditionalPhenotype.new_phenotype_file, outcome_name = this_outcome_name, outcome_type = this_outcome_type, covariates_string = this_covariates_string, conditional_string = these_snps, ivars_string = this_ivars_string, sample_file = this_sample_file, label = this_label, kinship_matrix = this_kinship_matrix, id_col = this_id_col, script = getScript.null_script, memory = this_memory, disk = this_disk
+			input: genotype_file = null_genotype_file, phenotype_file = conditionalPhenotype.new_phenotype_file, outcome_name = this_outcome_name, outcome_type = this_outcome_type, covariates_string = this_covariates_string, conditional_string = these_snps, ivars_string = this_ivars_string, group_var = this_group_var, sample_file = this_sample_file, label = this_label, kinship_matrix = this_kinship_matrix, id_col = this_id_col, script = getScript.null_script, memory = this_memory, disk = this_disk
 		}
 
 		scatter(this_genotype_file in these_genotype_files) {
@@ -177,7 +179,7 @@ workflow w_assocTest {
 		if(!need_null) {
 			
 			call fitNull {
-				input: genotype_file = null_genotype_file, phenotype_file = this_phenotype_file, outcome_name = this_outcome_name, outcome_type = this_outcome_type, covariates_string = this_covariates_string, conditional_string = these_snps, ivars_string = this_ivars_string, sample_file = this_sample_file, label = this_label, kinship_matrix = this_kinship_matrix, id_col = this_id_col, script = getScript.null_script, memory = this_memory, disk = this_disk
+				input: genotype_file = null_genotype_file, phenotype_file = this_phenotype_file, outcome_name = this_outcome_name, outcome_type = this_outcome_type, covariates_string = this_covariates_string, conditional_string = these_snps, ivars_string = this_ivars_string, group_var = this_group_var, sample_file = this_sample_file, label = this_label, kinship_matrix = this_kinship_matrix, id_col = this_id_col, script = getScript.null_script, memory = this_memory, disk = this_disk
 			}
 
 			scatter(this_genotype_file in these_genotype_files) {

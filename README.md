@@ -1,4 +1,4 @@
-# Single Variant Association -- Mixed Model Models
+# Single Variant Association -- Mixed Models
 
 ## Description 
 

@@ -1,8 +1,8 @@
-# Single Variant Association -- Linear Mixed Models 
+# Single Variant Association -- Mixed Models
 
 ## Description 
 
-This workflow performs a single variant association analysis of genotype data with a single phenotype using linear mixed models with fixed effects. The primary code is written in R using the GENESIS package for model fitting and association testing. The workflow can either generate a null model from phenotype and relatedness data or use a pregenerated null model.
+This workflow implements a single variant association analysis of genotype data with a single trait using mixed models. The primary code is written in R using the GENESIS package for model fitting and association testing. The workflow can either generate a null model from traits and covariates and a genetic related matrix or use a pre-generated null model obtained from GENESIS.
 
 ### Authors
 
@@ -17,7 +17,7 @@ This workflow is produced and maintained by the [Manning Lab](https://manning-la
 ### Workflow execution
 
 * [WDL](https://software.broadinstitute.org/wdl/documentation/quickstart)
-* [Chromwell](http://cromwell.readthedocs.io/en/develop/)
+* [Cromwell](http://cromwell.readthedocs.io/en/develop/)
 
 ### R packages
 
@@ -28,10 +28,10 @@ This workflow is produced and maintained by the [Manning Lab](https://manning-la
 * [data.table](https://cran.r-project.org/web/packages/data.table/index.html)
 * [qqman](https://cran.r-project.org/web/packages/qqman/index.html)
 
-## Main Functions
+## Workflow elements
 
-### preprocessConditional
-This function preprocesses the phenotype file for a conditional analysis on some snps, extracting the genotype information and adding to the phenotypes for each sample.
+### preprocess_conditional.R
+This script preprocesses the phenotype file for a conditional analysis on some snps, extracting the genotype information and adding to the phenotypes for each sample.
 
 Inputs:
 * genotype_files : comma separated list of gds file paths, this list must contain gds files for every snp
@@ -43,9 +43,9 @@ Outputs :
 * new_phenotype_file : phenotype.data input with appended dosage columns for snps of interest (.csv)
 * alt_ref : text file with alternate and reference alleles for each snp of interest (.txt)
 
-### fitNull
+### genesis_nullmodel.R
 
-This function generates a null model to be used in association testing in Genesis
+This script generates a null model to be used in association testing in Genesis
 
 Inputs:
 * genotype_files : genotype data for all samples (array of VCF or GDS file)
@@ -61,13 +61,13 @@ Inputs:
 Outputs:
 * model : generated null model (.RDa)
 
-### assocTest
+### association.R
 
-This function performs an association test to generate p-values for each variant included.
+This script performs an association test to generate p-values for each variant included.
 
 Inputs:
 * gds_file : a genotype file containing data for all samples are variants to be tested (.gds)
-* null_file : output of the function *fitNull* or a pregenerated null model (.RDa)
+* null_file : output of the task *fitNull* or a pregenerated null model (.RDa)
 * label : prefix for output filename (string)
 * test : statistical test (Score or Wald, default = Score)
 * mac : minimum minor allele count for variants to be included in analysis (int, default = 5)
@@ -75,9 +75,9 @@ Inputs:
 Outputs:
 * assoc : an RData file of associations results (.RData)
 
-### summary
+### summary.R
 
-Generate a summary of association results including quantile-quantile and manhattan plots for variants subseted by minor allele frequency (all variants, maf < 5%, maf >= 5%). Also generates CSV files of all and the top associated variants.
+Generate a summary of association results including quantile-quantile and manhattan plots for variants subseted by minor allele frequency (all variants, maf < 5%, maf >= 5%). Also generates CSV files of all variants and variants with P < pval_threshold.
 
 Inputs:
 * pval : the p-value column in the output of assocTest, this should be the statistical test with ".pval" appended (string, Score -> Score.pval, Wald -> Wald.pval)

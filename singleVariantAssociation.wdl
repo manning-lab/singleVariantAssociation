@@ -13,7 +13,7 @@ task conditionalPhenotype {
 	}
 
 	runtime {
-		docker: "tmajarian/single-var@sha256:6987e39c12c75779900412c4c838a636fae862b5f764d64e85571a152b33002e"
+		docker: "tmajarian/single-var@sha256:0d1369d43cdfe6ce762807cc475ab5dc530699d87c9c652b6744ad5f06f742a4"
 		disks: "local-disk ${disk} SSD"
 		memory: "10G"
 	}
@@ -46,7 +46,7 @@ task fitNull {
 	}
 
 	runtime {
-		docker: "tmajarian/single-var@sha256:6987e39c12c75779900412c4c838a636fae862b5f764d64e85571a152b33002e"
+		docker: "tmajarian/single-var@sha256:0d1369d43cdfe6ce762807cc475ab5dc530699d87c9c652b6744ad5f06f742a4"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory}G"
 	}
@@ -78,7 +78,7 @@ task assocTest {
 	}
 	
 	runtime {
-		docker: "tmajarian/single-var@sha256:6987e39c12c75779900412c4c838a636fae862b5f764d64e85571a152b33002e"
+		docker: "tmajarian/single-var@sha256:0d1369d43cdfe6ce762807cc475ab5dc530699d87c9c652b6744ad5f06f742a4"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory}G"
 	}
@@ -102,7 +102,7 @@ task summary {
 	}
 	
 	runtime {
-		docker: "tmajarian/single-var@sha256:6987e39c12c75779900412c4c838a636fae862b5f764d64e85571a152b33002e"
+		docker: "tmajarian/single-var@sha256:0d1369d43cdfe6ce762807cc475ab5dc530699d87c9c652b6744ad5f06f742a4"
   	    disks: "local-disk ${disk} SSD"
         memory: "${memory}G"
 	}

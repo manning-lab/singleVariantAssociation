@@ -1,0 +1,53 @@
+#!/usr/bin/env cwl-runner
+
+cwlVersion: v1.0
+class: CommandLineTool
+label: Run genesis association testing
+hints:
+  DockerRequirement:
+    dockerPull: robbyjo/r-mkl-bioconductor:3.4.1
+baseCommand: Rscript
+inputs:
+  script:
+    type: string
+    inputBinding:
+      position: 1
+
+  gds_file:
+    type: File
+    inputBinding:
+      position: 2
+  
+  null_file:
+    type: File
+    inputBinding:
+      position: 3
+
+  label:
+    type: string
+    inputBinding:
+      position: 4
+
+  test:
+    type: string
+    inputBinding:
+      position: 5
+      default: "Score"
+
+  ivars_string:
+    type: string
+    inputBinding:
+      position: 6
+      default: "NA"
+
+  mac:
+    type: int
+    inputBinding:
+      position: 7
+      default: "5"
+
+outputs:
+  assoc_file:
+    type: File
+    outputBinding:
+      glob: "*.assoc.RData"

@@ -36,6 +36,7 @@ inputs:
     type: string
     inputBinding:
       position: 5
+      default: "NA"
 
   label:
   	type: string

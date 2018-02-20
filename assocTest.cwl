@@ -5,7 +5,7 @@ class: CommandLineTool
 label: Run genesis association testing
 hints:
   DockerRequirement:
-    dockerPull: robbyjo/r-mkl-bioconductor:3.4.1
+    dockerPull: tmajarian/single-var@sha256:cfd43db702b6f067c21a54e3a4750ca341a3b11e2b81109c55b25752e6c98c4a
 baseCommand: Rscript
 inputs:
   script:

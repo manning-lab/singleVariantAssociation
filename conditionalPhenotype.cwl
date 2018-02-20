@@ -5,7 +5,7 @@ class: CommandLineTool
 label: Run summary after assoc test
 hints:
   DockerRequirement:
-    dockerPull: tmajarian/single-var@sha256:0d1369d43cdfe6ce762807cc475ab5dc530699d87c9c652b6744ad5f06f742a4
+    dockerPull: tmajarian/single-var@sha256:cfd43db702b6f067c21a54e3a4750ca341a3b11e2b81109c55b25752e6c98c4a
 baseCommand: Rscript
 inputs:
 

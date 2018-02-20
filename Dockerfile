@@ -5,6 +5,4 @@ RUN apt-get -y install git
 RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" > ~/.Rprofile
 RUN Rscript -e "install.packages('data.table')"
 
-RUN git clone https://github.com/manning-lab/singleVariantAssociation.git
-RUN cd ./singleVariantAssociation && git fetch
-RUN cd ./singleVariantAssociation && git pull origin master
+RUN git clone https://github.com/manning-lab/singleVariantAssociation.git && cd ./singleVariantAssociation && git pull origin master

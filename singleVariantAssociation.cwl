@@ -5,7 +5,6 @@ class: Workflow
 inputs:
   this_genotype_files: File
   this_phenotype_file: File
-  this_snps: string
   this_outcome_name: string
   this_outcome_type: string
   this_covariates_string: string
@@ -17,7 +16,6 @@ inputs:
   this_kinship_matrix: File
   this_id_col: string
   this_test: string
-  this_ivars_string: string
   this_mac: int
   this_pval: string
   this_pval_threshold: float
@@ -50,7 +48,7 @@ steps:
       genotype_files: this_genotype_files
       phenotype_file: this_phenotype_file
       sample_file: this_sample_file
-      snps: this_snps
+      snps: this_conditional_string
       label: this_label
       script: "preprocess_conditional.R"
     out: [new_phenotype_file, alt_ref]

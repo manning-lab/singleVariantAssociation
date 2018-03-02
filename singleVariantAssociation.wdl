@@ -13,7 +13,7 @@ task conditionalPhenotype {
 	}
 
 	runtime {
-		docker: "tmajarian/single-var@sha256:cfd43db702b6f067c21a54e3a4750ca341a3b11e2b81109c55b25752e6c98c4a"
+		docker: "tmajarian/singlevariantassociation:latest"
 		disks: "local-disk ${disk} SSD"
 		memory: "10G"
 	}
@@ -46,7 +46,7 @@ task fitNull {
 	}
 
 	runtime {
-		docker: "tmajarian/single-var@sha256:cfd43db702b6f067c21a54e3a4750ca341a3b11e2b81109c55b25752e6c98c4a"
+		docker: "tmajarian/singlevariantassociation:latest"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory}G"
 	}
@@ -79,7 +79,7 @@ task assocTest {
 	}
 	
 	runtime {
-		docker: "tmajarian/single-var@sha256:cfd43db702b6f067c21a54e3a4750ca341a3b11e2b81109c55b25752e6c98c4a"
+		docker: "tmajarian/singlevariantassociation:latest"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory}G"
 	}
@@ -103,7 +103,7 @@ task summary {
 	}
 	
 	runtime {
-		docker: "tmajarian/single-var@sha256:cfd43db702b6f067c21a54e3a4750ca341a3b11e2b81109c55b25752e6c98c4a"
+		docker: "tmajarian/singlevariantassociation:latest"
   	    disks: "local-disk ${disk} SSD"
         memory: "${memory}G"
 	}

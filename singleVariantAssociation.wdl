@@ -64,12 +64,13 @@ task assocTest {
 	String? test
 	String? ivars_string
 	Int? mac
+	String? variant_range
 
 	Int memory
 	Int disk
 
 	command {
-		R --vanilla --args ${gds_file} ${null_file} ${label} ${default="Score" test} ${default="5" mac} ${default="NA" ivars_string} < /singleVariantAssociation/association.R
+		R --vanilla --args ${gds_file} ${null_file} ${label} ${default="Score" test} ${default="5" mac} ${default="NA" ivars_string} ${default="NA" variant_range} < /singleVariantAssociation/association.R
 	}
 
 	meta {
@@ -136,6 +137,7 @@ workflow w_assocTest {
 	File? this_null_file
 	String? this_test
 	Int? this_mac
+	String? this_variant_range
 
 	# summary inputs
 	String this_pval
@@ -162,7 +164,7 @@ workflow w_assocTest {
 		scatter(this_genotype_file in these_genotype_files) {
 		
 			call assocTest as assocTestConditional {
-				input: gds_file = this_genotype_file, null_file = fitNullConditional.model, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, memory = this_memory, disk = this_disk
+				input: gds_file = this_genotype_file, null_file = fitNullConditional.model, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, variant_range = this_variant_range, memory = this_memory, disk = this_disk
 			}
 		}
 
@@ -182,7 +184,7 @@ workflow w_assocTest {
 			scatter(this_genotype_file in these_genotype_files) {
 			
 				call assocTest {
-					input: gds_file = this_genotype_file, null_file = fitNull.model, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, memory = this_memory, disk = this_disk
+					input: gds_file = this_genotype_file, null_file = fitNull.model, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, variant_range = this_variant_range, memory = this_memory, disk = this_disk
 				}
 			}
 
@@ -197,7 +199,7 @@ workflow w_assocTest {
 			scatter(this_genotype_file in these_genotype_files) {
 			
 				call assocTest as assocNull {
-					input: gds_file = this_genotype_file, null_file = this_null_file, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, memory = this_memory, disk = this_disk
+					input: gds_file = this_genotype_file, null_file = this_null_file, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, variant_range = this_variant_range, memory = this_memory, disk = this_disk
 				}
 			}
 

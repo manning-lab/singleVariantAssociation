@@ -17,8 +17,8 @@ task conditionalPhenotype {
 		echo "snps: ${snps}" >> conditionalPhenotype.log
 		echo "label: ${label}" >> conditionalPhenotype.log
 		echo "disk: ${disk}" >> conditionalPhenotype.log
-		echo "\nDSTAT" >> conditionalPhenotype.log
-		dstat -c -d -m --nocolor 1>>conditionalPhenotype.log &
+		echo "" >> conditionalPhenotype.log
+		dstat -c -d -m --nocolor 10 1>>conditionalPhenotype.log &
 		R --vanilla --args ${sep="," genotype_files} ${phenotype_file} ${id_col} ${default="NA" sample_file} ${snps} ${label} < /singleVariantAssociation/preprocess_conditional.R
 	}
 
@@ -68,8 +68,8 @@ task fitNull {
 		echo "id_col: ${id_col}" >> fitNull.log
 		echo "memory: ${memory}" >> fitNull.log
 		echo "disk: ${disk}" >> fitNull.log
-		echo "\nDSTAT" >> fitNull.log
-		dstat -c -d -m --nocolor 1>>fitNull.log &
+		echo "" >> fitNull.log
+		dstat -c -d -m --nocolor 10 1>>fitNull.log &
 		R --vanilla --args ${genotype_file} ${phenotype_file} ${outcome_name} ${outcome_type} ${default="NA" covariates_string} ${default="NA" conditional_string} ${default="NA" ivars_string} ${default="NA" group_var} ${default="NA" sample_file} ${label} ${kinship_matrix} ${id_col} < /singleVariantAssociation/genesis_nullmodel.R
 	}
 
@@ -109,8 +109,8 @@ task assocTest {
 		echo "variant_range: ${variant_range}" >> assocTest.log
 		echo "memory: ${memory}" >> assocTest.log
 		echo "disk: ${disk}" >> assocTest.log
-		echo "\nDSTAT" >> assocTest.log
-		dstat -c -d -m --nocolor 1>>assocTest.log &
+		echo "" >> assocTest.log
+		dstat -c -d -m --nocolor 10 1>>assocTest.log &
 		R --vanilla --args ${gds_file} ${null_file} ${label} ${default="Score" test} ${default="5" mac} ${default="NA" ivars_string} ${default="NA" variant_range} < /singleVariantAssociation/association.R
 	}
 
@@ -147,6 +147,8 @@ task summary {
 		echo "assoc: ${sep = ',' assoc}" >> summary.log
 		echo "memory: ${memory}" >> summary.log
 		echo "disk: ${disk}" >> summary.log
+		echo "" >> summary.log
+		dstat -c -d -m --nocolor 10 1>>summary.log &
 		R --vanilla --args ${pval} ${default="0.0001" pval_threshold} ${label} ${sep = ',' assoc} < /singleVariantAssociation/summary.R
 	}
 	

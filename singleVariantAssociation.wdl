@@ -9,16 +9,16 @@ task conditionalPhenotype {
 	Int disk
 
 	command {
-		echo "Input files" > conditionalPhenotype.log
-		echo "genotype_files: ${sep="," genotype_files}" >> conditionalPhenotype.log
-		echo "phenotype_file: ${phenotype_file}" >> conditionalPhenotype.log
-		echo "id_col: ${id_col}" >> conditionalPhenotype.log
-		echo "sample_file: ${sample_file}" >> conditionalPhenotype.log
-		echo "snps: ${snps}" >> conditionalPhenotype.log
-		echo "label: ${label}" >> conditionalPhenotype.log
-		echo "disk: ${disk}" >> conditionalPhenotype.log
-		echo "" >> conditionalPhenotype.log
-		dstat -c -d -m --nocolor 10 1>>conditionalPhenotype.log &
+		echo "Input files" > conditionalPhenotype_out.log
+		echo "genotype_files: ${sep="," genotype_files}" >> conditionalPhenotype_out.log
+		echo "phenotype_file: ${phenotype_file}" >> conditionalPhenotype_out.log
+		echo "id_col: ${id_col}" >> conditionalPhenotype_out.log
+		echo "sample_file: ${sample_file}" >> conditionalPhenotype_out.log
+		echo "snps: ${snps}" >> conditionalPhenotype_out.log
+		echo "label: ${label}" >> conditionalPhenotype_out.log
+		echo "disk: ${disk}" >> conditionalPhenotype_out.log
+		echo "" >> conditionalPhenotype_out.log
+		dstat -c -d -m --nocolor 10 1>>conditionalPhenotype_out.log &
 		R --vanilla --args ${sep="," genotype_files} ${phenotype_file} ${id_col} ${default="NA" sample_file} ${snps} ${label} < /singleVariantAssociation/preprocess_conditional.R
 	}
 
@@ -31,7 +31,7 @@ task conditionalPhenotype {
 	output {
 		File new_phenotype_file = "${label}_phenotypes.csv"
 		File alt_ref = "${label}_alleles.txt"
-		File log_file = "conditionalPhenotype.log"
+		File log_file = "conditionalPhenotype_out.log"
 	}
 }
 
@@ -53,23 +53,23 @@ task fitNull {
 	Int disk
 
 	command {
-		echo "Input files" > fitNull.log
-		echo "genotype_file: ${genotype_file}" >> fitNull.log
-		echo "phenotype_file: ${phenotype_file}" >> fitNull.log
-		echo "outcome_name: ${outcome_name}" >> fitNull.log
-		echo "outcome_type: ${outcome_type}" >> fitNull.log
-		echo "covariates_string: ${covariates_string}" >> fitNull.log
-		echo "conditional_string: ${conditional_string}" >> fitNull.log
-		echo "ivars_string: ${ivars_string}" >> fitNull.log
-		echo "group_var: ${group_var}" >> fitNull.log
-		echo "sample_file: ${sample_file}" >> fitNull.log
-		echo "label: ${label}" >> fitNull.log
-		echo "kinship_matrix: ${kinship_matrix}" >> fitNull.log
-		echo "id_col: ${id_col}" >> fitNull.log
-		echo "memory: ${memory}" >> fitNull.log
-		echo "disk: ${disk}" >> fitNull.log
-		echo "" >> fitNull.log
-		dstat -c -d -m --nocolor 10 1>>fitNull.log &
+		echo "Input files" > fitNull_out.log
+		echo "genotype_file: ${genotype_file}" >> fitNull_out.log
+		echo "phenotype_file: ${phenotype_file}" >> fitNull_out.log
+		echo "outcome_name: ${outcome_name}" >> fitNull_out.log
+		echo "outcome_type: ${outcome_type}" >> fitNull_out.log
+		echo "covariates_string: ${covariates_string}" >> fitNull_out.log
+		echo "conditional_string: ${conditional_string}" >> fitNull_out.log
+		echo "ivars_string: ${ivars_string}" >> fitNull_out.log
+		echo "group_var: ${group_var}" >> fitNull_out.log
+		echo "sample_file: ${sample_file}" >> fitNull_out.log
+		echo "label: ${label}" >> fitNull_out.log
+		echo "kinship_matrix: ${kinship_matrix}" >> fitNull_out.log
+		echo "id_col: ${id_col}" >> fitNull_out.log
+		echo "memory: ${memory}" >> fitNull_out.log
+		echo "disk: ${disk}" >> fitNull_out.log
+		echo "" >> fitNull_out.log
+		dstat -c -d -m --nocolor 10 1>>fitNull_out.log &
 		R --vanilla --args ${genotype_file} ${phenotype_file} ${outcome_name} ${outcome_type} ${default="NA" covariates_string} ${default="NA" conditional_string} ${default="NA" ivars_string} ${default="NA" group_var} ${default="NA" sample_file} ${label} ${kinship_matrix} ${id_col} < /singleVariantAssociation/genesis_nullmodel.R
 	}
 
@@ -81,7 +81,7 @@ task fitNull {
 
 	output {
 		File model = "${label}_null.RDa"
-		File log_file = "fitNull.log"
+		File log_file = "fitNull_out.log"
 	}
 }
 
@@ -99,18 +99,18 @@ task assocTest {
 	Int disk
 
 	command {
-		echo "Input files" > assocTest.log
-		echo "gds_file: ${gds_file}" >> assocTest.log
-		echo "null_file: ${null_file}" >> assocTest.log
-		echo "label: ${label}" >> assocTest.log
-		echo "test: ${test}" >> assocTest.log
-		echo "ivars_string: ${ivars_string}" >> assocTest.log
-		echo "mac: ${mac}" >> assocTest.log
-		echo "variant_range: ${variant_range}" >> assocTest.log
-		echo "memory: ${memory}" >> assocTest.log
-		echo "disk: ${disk}" >> assocTest.log
-		echo "" >> assocTest.log
-		dstat -c -d -m --nocolor 10 1>>assocTest.log &
+		echo "Input files" > assocTest_out.log
+		echo "gds_file: ${gds_file}" >> assocTest_out.log
+		echo "null_file: ${null_file}" >> assocTest_out.log
+		echo "label: ${label}" >> assocTest_out.log
+		echo "test: ${test}" >> assocTest_out.log
+		echo "ivars_string: ${ivars_string}" >> assocTest_out.log
+		echo "mac: ${mac}" >> assocTest_out.log
+		echo "variant_range: ${variant_range}" >> assocTest_out.log
+		echo "memory: ${memory}" >> assocTest_out.log
+		echo "disk: ${disk}" >> assocTest_out.log
+		echo "" >> assocTest_out.log
+		dstat -c -d -m --nocolor 10 1>>assocTest_out.log &
 		R --vanilla --args ${gds_file} ${null_file} ${label} ${default="Score" test} ${default="5" mac} ${default="NA" ivars_string} ${default="NA" variant_range} < /singleVariantAssociation/association.R
 	}
 
@@ -127,7 +127,7 @@ task assocTest {
 
 	output {
 		File assoc = "${label}.assoc.RData"
-		File log_file = "assocTest.log"
+		File log_file = "assocTest_out.log"
 	}
 }
 
@@ -141,14 +141,14 @@ task summary {
 	Int disk
 
 	command {
-		echo "Input files" > summary.log
-		echo "pval: ${pval}" >> summary.log
-		echo "label: ${label}" >> summary.log
-		echo "assoc: ${sep = ',' assoc}" >> summary.log
-		echo "memory: ${memory}" >> summary.log
-		echo "disk: ${disk}" >> summary.log
-		echo "" >> summary.log
-		dstat -c -d -m --nocolor 10 1>>summary.log &
+		echo "Input files" > summary_out.log
+		echo "pval: ${pval}" >> summary_out.log
+		echo "label: ${label}" >> summary_out.log
+		echo "assoc: ${sep = ',' assoc}" >> summary_out.log
+		echo "memory: ${memory}" >> summary_out.log
+		echo "disk: ${disk}" >> summary_out.log
+		echo "" >> summary_out.log
+		dstat -c -d -m --nocolor 10 1>>summary_out.log &
 		R --vanilla --args ${pval} ${default="0.0001" pval_threshold} ${label} ${sep = ',' assoc} < /singleVariantAssociation/summary.R
 	}
 	
@@ -162,7 +162,7 @@ task summary {
 		File allassoccsv = "${label}.assoc.csv"
 		File topassoccsv = "${label}.topassoc.csv"
 		File plots = "${label}_association_plots.png"
-		File log_file = "summary.log"
+		File log_file = "summary_out.log"
 	}
 }
 

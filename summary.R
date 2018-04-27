@@ -62,6 +62,13 @@ if (length(assoc.files) == 0){
   # Write out the top results
   fwrite(assoc.compilation[assoc.compilation[,pval] < pval.threshold, ], paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F)
   
+  # Calculate genomic control
+  lam = function(x,p=.5){
+    x = x[!is.na(x)]
+    chisq <- qchisq(1-x,1)
+    round((quantile(chisq,p)/qchisq(p,1)),2)
+  }
+
   # QQ plots by maf
   png(filename = paste(label,"_association_plots.png",sep=""),width = 11, height = 11, units = "in", res=400, type = "cairo")
   par(mfrow=c(3,3))
@@ -70,10 +77,12 @@ if (length(assoc.files) == 0){
   qq(assoc.compilation$P,main="All variants")
   
   # Common variants
-  qq(assoc.compilation$P[assoc.compilation$MAF>0.05],main="Variants with MAF>0.05")
+  qq(assoc.compilation$P[assoc.compilation$MAF>0.05],main="Variants with MAF > 5%")
+  legend('topleft',c(paste0('MAF > 5%',lam(assoc.compilation$P[assoc.compilation$MAF>0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF>0.05],.9)))
   
   # Rare/Low frequency variants
-  qq(assoc.compilation$P[assoc.compilation$MAF<=0.05],main="Variants with MAF<=0.05")
+  qq(assoc.compilation$P[assoc.compilation$MAF<=0.05],main="Variants with MAF <= 5%")
+  legend('topleft',c(paste0('MAF <= 5%',lam(assoc.compilation$P[assoc.compilation$MAF<=0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF<=0.05],.9)))
   
   # Manhattan plots by maf
   # All variants

@@ -75,14 +75,15 @@ if (length(assoc.files) == 0){
   
   # All variants
   qq(assoc.compilation$P,main="All variants")
+  legend('topleft',c(paste0("GC = ", lam(assoc.compilation$P),'/',lam(assoc.compilation$P,.9))))
   
   # Common variants
   qq(assoc.compilation$P[assoc.compilation$MAF>0.05],main="Variants with MAF > 5%")
-  legend('topleft',c(paste0('MAF > 5%',lam(assoc.compilation$P[assoc.compilation$MAF>0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF>0.05],.9)))
+  legend('topleft',c(paste0("GC = ", lam(assoc.compilation$P[assoc.compilation$MAF>0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF>0.05],.9))))
   
   # Rare/Low frequency variants
   qq(assoc.compilation$P[assoc.compilation$MAF<=0.05],main="Variants with MAF <= 5%")
-  legend('topleft',c(paste0('MAF <= 5%',lam(assoc.compilation$P[assoc.compilation$MAF<=0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF<=0.05],.9)))
+  legend('topleft',c(paste0("GC = ",lam(assoc.compilation$P[assoc.compilation$MAF<=0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF<=0.05],.9))))
   
   # Manhattan plots by maf
   # All variants

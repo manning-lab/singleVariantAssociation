@@ -61,38 +61,69 @@ if (length(assoc.files) == 0){
   
   # Write out the top results
   fwrite(assoc.compilation[assoc.compilation[,pval] < pval.threshold, ], paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F)
+
+  # generate the QQ plot (from J Wessel)
+  qqpval2 = function(x, main="", col="black"){
+    x<-sort(-log(x[x>0],10))
+    n<-length(x)
+    plot(x=qexp(ppoints(n))/log(10), y=x, xlab="Expected", ylab="Observed", main=main ,col=col ,cex=.8, bg= col, pch = 21)
+    abline(0,1, lty=2)
+  }
   
-  # Calculate genomic control
+  # QQ without identity line
+  qqpvalOL = function(x, col="blue"){
+    x<-sort(-log(x[x>0],10))
+    n<-length(x)
+    points(x=qexp(ppoints(n))/log(10), y=x, col=col, cex=.8, bg = col, pch = 21)
+  }
+  
+  # get the right colors
+  library(RColorBrewer)
+  cols <- brewer.pal(8,"Dark2")
+  
+  # calculate control
   lam = function(x,p=.5){
     x = x[!is.na(x)]
     chisq <- qchisq(1-x,1)
     round((quantile(chisq,p)/qchisq(p,1)),2)
   }
-
-  # QQ plots by maf
+  
+  # QQ plot
   png(filename = paste(label,"_association_plots.png",sep=""),width = 11, height = 11, units = "in", res=400, type = "cairo")
-  par(mfrow=c(3,3))
+  # par(mfrow=c(1,2))
+  layout(matrix(c(1,2,3,3),nrow=2,byrow = T))
   
-  # All variants
-  qq(assoc.compilation$P,main="All variants")
-  legend('topleft',c(paste0("GC = ", lam(assoc.compilation$P),'/',lam(assoc.compilation$P,.9))))
+  qqpval2(assoc.compilation[,pval],col=cols[8])
+  legend('topleft',c(paste0('ALL ',lam(assoc.compilation[,pval]),'/',lam(assoc.compilation[,pval],.9))),col=c(cols[8]),pch=c(21))
   
-  # Common variants
-  qq(assoc.compilation$P[assoc.compilation$MAF>0.05],main="Variants with MAF > 5%")
-  legend('topleft',c(paste0("GC = ", lam(assoc.compilation$P[assoc.compilation$MAF>0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF>0.05],.9))))
-  
-  # Rare/Low frequency variants
-  qq(assoc.compilation$P[assoc.compilation$MAF<=0.05],main="Variants with MAF <= 5%")
-  legend('topleft',c(paste0("GC = ",lam(assoc.compilation$P[assoc.compilation$MAF<=0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF<=0.05],.9))))
-  
+  qqpval2(assoc.compilation[assoc.compilation$MAF>=0.05,pval],col=cols[1])
+  qqpvalOL(assoc.compilation[assoc.compilation$MAF < 0.05,pval],col=cols[2])
+  legend('topleft',c(paste0('MAF >= 5%  ',lam(assoc.compilation[assoc.compilation$MAF>=0.05,pval]),'/',lam(assoc.compilation[assoc.compilation$MAF>=0.05,pval],.9)),
+                     paste0('MAF < 5%  ',lam(assoc.compilation[assoc.compilation$MAF < 0.05,pval]),'/',lam(assoc.compilation[assoc.compilation$MAF < 0.05,pval],.9))
+  ),
+  col=c(cols[1],cols[2]),pch=c(21,21))
+  # dev.off()
+  # # # Old code
+  # # All variants
+  # qq(assoc.compilation$P,main="All variants")
+  # legend('topleft',c(paste0("GC = ", lam(assoc.compilation$P),'/',lam(assoc.compilation$P,.9))))
+  # 
+  # # Common variants
+  # qq(assoc.compilation$P[assoc.compilation$MAF>0.05],main="Variants with MAF > 5%")
+  # legend('topleft',c(paste0("GC = ", lam(assoc.compilation$P[assoc.compilation$MAF>0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF>0.05],.9))))
+  # 
+  # # Rare/Low frequency variants
+  # qq(assoc.compilation$P[assoc.compilation$MAF<=0.05],main="Variants with MAF <= 5%")
+  # legend('topleft',c(paste0("GC = ",lam(assoc.compilation$P[assoc.compilation$MAF<=0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF<=0.05],.9))))
+  # 
   # Manhattan plots by maf
   # All variants
   manhattan(assoc.compilation,chr="chr",bp="pos",p="P", main="All variants")
   
-  # Common variants
-  manhattan(assoc.compilation[assoc.compilation$MAF>0.05,],chr="chr",bp="pos",p="P", main="Variants with MAF>0.05")
-  
-  # Rare/Low frequency variants
-  manhattan(assoc.compilation[assoc.compilation$MAF<=0.05,],chr="chr",bp="pos",p="P", main="Variants with MAF<=0.05")
+  # # Common variants
+  # manhattan(assoc.compilation[assoc.compilation$MAF>=0.05,],chr="chr",bp="pos",p="P",snp="snpID", col=assoc.compilation[assoc.compilation$MAF>=0.05,]$color, main="Variants with MAF>0.05")
+  # 
+  # # Rare/Low frequency variants
+  # manhattan(assoc.compilation[assoc.compilation$MAF<=0.05,],chr="chr",bp="pos",p="P", main="Variants with MAF<=0.05")
   dev.off()
 }

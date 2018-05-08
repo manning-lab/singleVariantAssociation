@@ -23,7 +23,7 @@ task conditionalPhenotype {
 	}
 
 	runtime {
-		docker: "tmajarian/singlevariantassociation:latest"
+		docker: "tmajarian/singlevariantassociation:lambda"
 		disks: "local-disk ${disk} SSD"
 		memory: "10G"
 	}
@@ -74,7 +74,7 @@ task fitNull {
 	}
 
 	runtime {
-		docker: "tmajarian/singlevariantassociation:latest"
+		docker: "tmajarian/singlevariantassociation:lambda"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory}G"
 	}
@@ -120,7 +120,7 @@ task assocTest {
 	}
 	
 	runtime {
-		docker: "tmajarian/singlevariantassociation:latest"
+		docker: "tmajarian/singlevariantassociation:lambda"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory}G"
 	}
@@ -153,7 +153,7 @@ task summary {
 	}
 	
 	runtime {
-		docker: "tmajarian/singlevariantassociation:latest"
+		docker: "tmajarian/singlevariantassociation:lambda"
   	    disks: "local-disk ${disk} SSD"
         memory: "${memory}G"
 	}

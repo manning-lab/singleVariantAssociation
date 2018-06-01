@@ -26,6 +26,7 @@ task conditionalPhenotype {
 		docker: "tmajarian/singlevariantassociation:latest"
 		disks: "local-disk ${disk} SSD"
 		memory: "10G"
+		bootDiskSizeGb: 20
 	}
 
 	output {
@@ -77,6 +78,7 @@ task fitNull {
 		docker: "tmajarian/singlevariantassociation:latest"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory}G"
+		bootDiskSizeGb: 20
 	}
 
 	output {
@@ -123,6 +125,7 @@ task assocTest {
 		docker: "tmajarian/singlevariantassociation:latest"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory}G"
+		bootDiskSizeGb: 20
 	}
 
 	output {
@@ -156,6 +159,7 @@ task summary {
 		docker: "tmajarian/singlevariantassociation:latest"
   	    disks: "local-disk ${disk} SSD"
         memory: "${memory}G"
+        bootDiskSizeGb: 20
 	}
 
 	output {

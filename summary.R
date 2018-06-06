@@ -44,9 +44,9 @@ if (length(assoc.files) == 0){
       
       # Write the results out to a master file
       if (i == 1) {
-        write.table(assoc,paste(label, ".assoc.csv", sep=""),sep=",",row.names=F)
+        write.table(assoc,paste(label, ".assoc.csv", sep=""),sep=",",row.names=F,quote = FALSE)
       } else {
-        write.table(assoc,paste(label, ".assoc.csv", sep=""),col.names=FALSE,sep=",",row.names=F, append=TRUE)
+        write.table(assoc,paste(label, ".assoc.csv", sep=""),col.names=FALSE,sep=",",row.names=F,quote = FALSE, append=TRUE)
       }	
     }
   }
@@ -60,7 +60,7 @@ if (length(assoc.files) == 0){
   assoc.compilation$P <- as.numeric(as.character(assoc.compilation[,pval]))
   
   # Write out the top results
-  fwrite(assoc.compilation[assoc.compilation[,pval] < pval.threshold, ], paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F)
+  fwrite(assoc.compilation[assoc.compilation[,pval] < pval.threshold, ], paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)
 
   # generate the QQ plot (from J Wessel)
   qqpval2 = function(x, main="", col="black"){

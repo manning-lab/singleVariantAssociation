@@ -41,7 +41,7 @@ if (length(assoc.files) == 0){
     if (!is.na(assoc)[1]){
       assoc <- assoc[!is.na(assoc[,pval]),]
       print(dim(assoc))
-      assoc$MarkerName <- apply(assoc,1,function(x){paste("chr",sub(" +","",x["chr"]),"-",sub(" +","",x["chr"]),x["pos"],"-",x["ref"],"-",x["alt"],sep="")})
+      assoc$MarkerName <- apply(assoc,1,function(x){paste("chr",sub(" +","",x["chr"]),"-",sub(" +","",x["pos"]),"-",x["ref"],"-",x["alt"],sep="")})
       
       # Write the results out to a master file
       if (i == 1) {

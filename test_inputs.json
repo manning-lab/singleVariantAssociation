@@ -1,5 +1,5 @@
 {
-  "w_assocTest.this_label": "demo",
+  "w_assocTest.this_label": "demo_1000_genomes",
   "w_assocTest.this_pval": "Score.pval",
   "w_assocTest.this_test": "Score",
   "w_assocTest.this_id_col": "sample_id",

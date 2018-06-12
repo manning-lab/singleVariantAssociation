@@ -9,7 +9,7 @@
   "w_assocTest.this_covariates_string": "ancestry,sex,last_exam_age,bmi",
   "w_assocTest.this_outcome_name": "t2d",
   "w_assocTest.this_disk": 50,
-  "w_assocTest.these_genotype_files": ["test_inputs/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.gds"],
+  "w_assocTest.these_genotype_files": ["test_inputs/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.MAC10.01p.gds"],
   "w_assocTest.this_fitnull_memory": 10,
   "w_assocTest.this_pval_threshold": 0.9,
   "w_assocTest.this_summary_memory": 5,

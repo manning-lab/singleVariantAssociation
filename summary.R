@@ -95,14 +95,15 @@ if (length(assoc.files) == 0){
   layout(matrix(c(1,2,3,3),nrow=2,byrow = T))
   
   qqpval2(assoc.compilation[,pval],col=cols[8])
-  legend('topleft',c(paste0('ALL ',lam(assoc.compilation[,pval]),'/',lam(assoc.compilation[,pval],.9))),col=c(cols[8]),pch=c(21))
+  legend('topleft',c(paste0('ALL ',lam(assoc.compilation[,pval]))),col=c(cols[8]),pch=c(21))
   
   qqpval2(assoc.compilation[assoc.compilation$MAF>=0.05,pval],col=cols[1])
   qqpvalOL(assoc.compilation[assoc.compilation$MAF < 0.05,pval],col=cols[2])
-  legend('topleft',c(paste0('MAF >= 5%  ',lam(assoc.compilation[assoc.compilation$MAF>=0.05,pval]),'/',lam(assoc.compilation[assoc.compilation$MAF>=0.05,pval],.9)),
-                     paste0('MAF < 5%  ',lam(assoc.compilation[assoc.compilation$MAF < 0.05,pval]),'/',lam(assoc.compilation[assoc.compilation$MAF < 0.05,pval],.9))
+  legend('topleft',c(paste0('MAF >= 5%  ',lam(assoc.compilation[assoc.compilation$MAF>=0.05,pval])),
+                     paste0('MAF < 5%  ',lam(assoc.compilation[assoc.compilation$MAF < 0.05,pval]))
   ),
   col=c(cols[1],cols[2]),pch=c(21,21))
+  
   # dev.off()
   # # # Old code
   # # All variants

@@ -17,6 +17,8 @@ library(GWASTools)
 library(SeqArray)
 library(SeqVarTools)
 library(data.table)
+library(dplyr)
+library(tidyr)
 
 # Parse input arguments
 input_args <- commandArgs(trailingOnly=T)
@@ -27,6 +29,25 @@ test <- input_args[4]
 mac <- as.numeric(input_args[5])
 ivars.string <- input_args[6]
 variant.range <- input_args[7]
+
+# these are from the DCC pipeline, credit -> S. Gogarten
+.variantDF <- function(gds) {
+  data.frame(variant.id=seqGetData(gds, "variant.id"),
+             chromosome=seqGetData(gds, "chromosome"),
+             position=seqGetData(gds, "position"),
+             ref=refChar(gds),
+             alt=altChar(gds),
+             nAlleles=seqNumAllele(gds),
+             stringsAsFactors=FALSE)
+}
+.expandAlleles <- function(gds) {
+  .variantDF(gds) %>%
+    separate_rows_("alt", sep=",") %>%
+    rename_(allele="alt") %>%
+    group_by_("variant.id") %>%
+    mutate_(allele.index=~1:n()) %>%
+    as.data.frame()
+}
 
 # Print input arguments
 print_ <- function(to_print) {
@@ -65,12 +86,8 @@ if(sum(gds.mac.filt, na.rm = TRUE)==0) {
 	seqSetFilter(gds.data, variant.sel=gds.mac.filt, action="intersect", verbose=TRUE)
 
   # Organize data for output
-  id <- seqGetData(gds.data,"variant.id")
-  chr <- seqGetData(gds.data,"chromosome")
-  pos <- seqGetData(gds.data,"position")
-  ref <- as.character(ref(gds.data))
-  alt <- as.character(unlist(alt(gds.data)))
-  snps.pos <- data.frame(id,chr,pos,ref,alt)
+  snps.pos <- .expandAlleles(gds.data)[,c(1,3,4,5)]
+  names(snps.pos) <- c("id","pos","ref","alt")
   
 	# Filter by variant range if it exists
 	if (!(variant.range == "NA")){
@@ -103,8 +120,7 @@ if(sum(gds.mac.filt, na.rm = TRUE)==0) {
 	}
 	print("Finished Association Step")
 	print(dim(assoc))
-	assoc <- cbind(snps.pos, assoc)
-
+	assoc <- merge(snps.pos, assoc, by.x = "id", by.y = "snpID")
 }
 ## save assoc object
 save(assoc, file=paste(label, ".assoc.RData", sep=""))

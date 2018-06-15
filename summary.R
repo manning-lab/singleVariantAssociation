@@ -64,10 +64,11 @@ if (length(assoc.files) == 0){
   fwrite(assoc.compilation[assoc.compilation[,pval] < pval.threshold, ], paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)
 
   # generate the QQ plot (from J Wessel)
-  qqpval2 = function(x, main="", col="black"){
+  qqpval2 = function(x, ymin, main="", col="black"){
     x<-sort(-log(x[x>0],10))
     n<-length(x)
-    plot(x=qexp(ppoints(n))/log(10), y=x, xlab="Expected", ylab="Observed", main=main ,col=col ,cex=.8, bg= col, pch = 21)
+    ymax <- -log(ymin,10)
+    plot(x=qexp(ppoints(n))/log(10), y=x, xlab="Expected", ylab="Observed", main=main ,col=col ,cex=.8, bg= col, pch = 21, ylim=c(0,ymax))
     abline(0,1, lty=2)
   }
   
@@ -93,11 +94,11 @@ if (length(assoc.files) == 0){
   png(filename = paste(label,"_association_plots.png",sep=""),width = 11, height = 11, units = "in", res=400, type = "cairo")
   # par(mfrow=c(1,2))
   layout(matrix(c(1,2,3,3),nrow=2,byrow = T))
-  
-  qqpval2(assoc.compilation[,pval],col=cols[8])
+  min.p <- min(assoc.compilation[,pval])
+  qqpval2(assoc.compilation[,pval],col=cols[8],ymin=min.p)
   legend('topleft',c(paste0('ALL ',lam(assoc.compilation[,pval]))),col=c(cols[8]),pch=c(21))
   
-  qqpval2(assoc.compilation[assoc.compilation$MAF>=0.05,pval],col=cols[1])
+  qqpval2(assoc.compilation[assoc.compilation$MAF>=0.05,pval],col=cols[1],ymin=min.p)
   qqpvalOL(assoc.compilation[assoc.compilation$MAF < 0.05,pval],col=cols[2])
   legend('topleft',c(paste0('MAF >= 5%  ',lam(assoc.compilation[assoc.compilation$MAF>=0.05,pval])),
                      paste0('MAF < 5%  ',lam(assoc.compilation[assoc.compilation$MAF < 0.05,pval]))

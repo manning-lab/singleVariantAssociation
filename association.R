@@ -84,6 +84,12 @@ if(sum(gds.mac.filt, na.rm = TRUE)==0) {
 
 	# Filter to snps with mac greater than threshold
 	seqSetFilter(gds.data, variant.sel=gds.mac.filt, action="intersect", verbose=TRUE)
+  
+  # Filter to only passing variants
+  var.ids <- seqGetData(gds.data,"variant.id")
+  filt <- seqGetData(gds.data, "annotation/filter")
+  var.ids <- var.ids[filt == "PASS"]
+  seqSetFilter(gds.data, variant.id = var.ids, action="intersect", verbose=TRUE)
 
   # Organize data for output
   snps.pos <- .expandAlleles(gds.data)[,c(1,3,4,5)]

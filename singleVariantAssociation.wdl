@@ -95,7 +95,7 @@ task assocTest {
 	String? test
 	String? ivars_string
 	Int? mac
-	String? variant_range
+	File? variant_range
 
 	Int memory
 	Int disk
@@ -192,7 +192,7 @@ workflow w_assocTest {
 	File? this_null_file
 	String? this_test
 	Int? this_mac
-	String? this_variant_range
+	File? this_variant_range
 
 	# summary inputs
 	String this_pval

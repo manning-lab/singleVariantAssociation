@@ -114,6 +114,7 @@ if(sum(gds.mac.filt, na.rm = TRUE)==0) {
 			
 			seqSetFilter(gds.data, variant.id=var.tokeep.id, action="intersect", verbose=TRUE)
 			snps.pos <- snps.pos[snps.pos$id %in% var.tokeep.id,]
+			snps.pos <- snps.pos[,!(names(snps.pos) == "chr")]
 		}
 		
 		# Print the number of snps were working with

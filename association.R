@@ -28,7 +28,7 @@ label <- input_args[3]
 test <- input_args[4]
 mac <- as.numeric(input_args[5])
 ivars.string <- input_args[6]
-variant.range <- input_args[7]
+variant.range.file <- input_args[7]
 
 # these are from the DCC pipeline, credit -> S. Gogarten
 .variantDF <- function(gds) {
@@ -59,7 +59,7 @@ print_(c("null.file", null.file))
 print_(c("test", test))
 print_(c("mac", mac))
 print_(c("ivars.string", ivars.string))
-print_(c("variant.range", variant.range))
+print_(c("variant.range.file", variant.range.file))
 
 
 # Load nullfile
@@ -91,42 +91,48 @@ if(sum(gds.mac.filt, na.rm = TRUE)==0) {
   var.ids <- var.ids[filt == "PASS"]
   seqSetFilter(gds.data, variant.id = var.ids, action="intersect", verbose=TRUE)
 
-  # Organize data for output
-  snps.pos <- .expandAlleles(gds.data)[,c(1,3,4,5)]
-  names(snps.pos) <- c("id","pos","ref","alt")
-  
-	# Filter by variant range if it exists
-	if (!(variant.range == "NA")){
-	  variant.range = as.list(unlist(strsplit(variant.range,",")))
-		variant.range.list <- lapply(lapply(variant.range, function(x) unlist(strsplit(x,":"))), function(y) c(y[1],unlist(strsplit(y[2],"-"))))
-		
-		var.tokeep.id <- c()
-		for (rng in variant.range.list){
-		  cur.var <- subset(snps.pos, chr == rng[1] & pos >= as.numeric(rng[2]) & pos <= as.numeric(rng[3]))
-		  var.tokeep.id <- c(var.tokeep.id, cur.var$id)
-		}
-		var.tokeep.id <- unique(var.tokeep.id)
-		
-		seqSetFilter(gds.data, variant.id=var.tokeep.id, action="intersect", verbose=TRUE)
-		snps.pos <- snps.pos[snps.pos$id %in% var.tokeep.id,]
-	}
-	
-	# Print the number of snps were working with
-	print("Filtered SNPs")
-	print(dim(snps.pos))
-
-	# Genotype data to the correct format
-	gds.geno.data <- SeqVarData(gds.data)
-
-	# Run association test
-	if (ivars.string == "NA"){
-		assoc <- assocTestMM(genoData = gds.geno.data, nullMMobj = nullmod, test = test)
+  # stop again if we have no passing variants
+  if (length(var.ids) == 0){
+  	print("No SNPs pass MAC filter. Finished Association Step")
+	  assoc <- NA
 	} else {
-		assoc <- assocTestMM(genoData = gds.geno.data, nullMMobj = nullmod, test = test, ivars=unlist(strsplit(ivars.string, ",")))
+
+	  # Organize data for output
+	  snps.pos <- .expandAlleles(gds.data)[,c(1,2,3,4,5)]
+	  names(snps.pos) <- c("id","chr","pos","ref","alt")
+	  
+		# Filter by variant range if it exists
+		if (!(variant.range.file == "NA")){
+			variant.range <- fread(variant.range.file, data.table = F, stringsAsFactors = F)
+			var.tokeep.id <- c()
+			for (rng.ind in seq(1,nrow(variant.range))){
+				rng <- variant.range[rng.ind,]
+			  cur.var <- subset(snps.pos, chr == rng[,1] & pos >= as.numeric(rng[,2]) & pos <= as.numeric(rng[,3]))
+			  var.tokeep.id <- c(var.tokeep.id, cur.var$id)
+			}
+			var.tokeep.id <- unique(var.tokeep.id)
+			
+			seqSetFilter(gds.data, variant.id=var.tokeep.id, action="intersect", verbose=TRUE)
+			snps.pos <- snps.pos[snps.pos$id %in% var.tokeep.id,]
+		}
+		
+		# Print the number of snps were working with
+		print("Filtered SNPs")
+		print(nrow(snps.pos))
+
+		# Genotype data to the correct format
+		gds.geno.data <- SeqVarData(gds.data)
+
+		# Run association test
+		if (ivars.string == "NA"){
+			assoc <- assocTestMM(genoData = gds.geno.data, nullMMobj = nullmod, test = test)
+		} else {
+			assoc <- assocTestMM(genoData = gds.geno.data, nullMMobj = nullmod, test = test, ivars=unlist(strsplit(ivars.string, ",")))
+		}
+		print("Finished Association Step")
+		print(dim(assoc))
+		assoc <- merge(snps.pos, assoc, by.x = "id", by.y = "snpID")
 	}
-	print("Finished Association Step")
-	print(dim(assoc))
-	assoc <- merge(snps.pos, assoc, by.x = "id", by.y = "snpID")
 }
 ## save assoc object
 save(assoc, file=paste(label, ".assoc.RData", sep=""))

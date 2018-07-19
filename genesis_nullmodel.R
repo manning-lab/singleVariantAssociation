@@ -52,7 +52,6 @@ if (!(group.var == "NA")){
     covariates <- c(covariates,group.var)
   }
 }
-
 # Check if we have ivars input, add to covars
 if (!ivars.string == "NA") {
   ivars <- unlist(strsplit(ivars.string, ","))

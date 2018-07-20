@@ -30,7 +30,13 @@ assoc$pos <- as.numeric(as.character(assoc$pos))
 assoc$P <- as.numeric(as.character(assoc[,pval]))
 
 # Write out the top results
-fwrite(assoc[assoc[,pval] < pval.threshold, ], paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)
+top.assoc <- assoc[assoc[,pval] < pval.threshold, ]
+if (nrow(top.assoc) = 0){
+  fwrite(list(), paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)
+} else {
+  fwrite(top.assoc, paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)  
+}
+
 
 # generate the QQ plot (from J Wessel)
 qqpval2 = function(x, ymin, main="", col="black"){

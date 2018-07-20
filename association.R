@@ -132,6 +132,7 @@ if(sum(gds.mac.filt, na.rm = TRUE)==0) {
 		}
 		print("Finished Association Step")
 		print(dim(assoc))
+		snps.pos <- snps.pos[,!(names(snps.pos) == "chr")]
 		assoc <- merge(snps.pos, assoc, by.x = "id", by.y = "snpID")
 	}
 }

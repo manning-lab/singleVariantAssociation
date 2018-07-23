@@ -31,7 +31,7 @@ assoc$P <- as.numeric(as.character(assoc[,pval]))
 
 # Write out the top results
 top.assoc <- assoc[assoc[,pval] < pval.threshold, ]
-if (nrow(top.assoc) = 0){
+if (nrow(top.assoc) == 0){
   fwrite(list(), paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)
 } else {
   fwrite(top.assoc, paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)  

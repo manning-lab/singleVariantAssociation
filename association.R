@@ -134,6 +134,54 @@ if(sum(gds.mac.filt, na.rm = TRUE)==0) {
 		print(dim(assoc))
 		snps.pos <- snps.pos[,!(names(snps.pos) == "chr")]
 		assoc <- merge(snps.pos, assoc, by.x = "id", by.y = "snpID")
+		
+		# get genotype counts for variants w/ MAF < 5% and P < 0.01 if we have a dichotomous trait
+		if (!is.null(nullmod$outcome) & length(unique(nullmod$outcome)) == 2){
+		
+  		# get case/control
+  		pheno <- data.frame(sample = as.character(nullmod$scanID), outcome = nullmod$outcome, stringsAsFactors = F)
+  		
+  		# get the variants that pass both maf and pval threshold 
+  		assoc.top_var <- assoc[(assoc$MAF < 0.05 & assoc[,paste0(test,".pval")] < 0.01), "id"]
+  		
+  		# set filter
+  		seqSetFilter(gds.data, variant.id = assoc.top_var, sample.id = pheno$sample)
+  		
+  		# get genotypes
+  		geno <- altDosage(gds.data)
+  		geno.ctrl <- geno[row.names(geno) %in% pheno[pheno$outcome == 0, "sample"],]
+  		geno.case <- geno[row.names(geno) %in% pheno[pheno$outcome == 1, "sample"],]
+  		rm(geno)
+  		
+  		# get counts per geno
+  		geno.ctrl.counts <- apply(geno.ctrl, 2, function(x) sum(x == 0))
+  		geno.ctrl.counts <- data.frame(variant.id = names(geno.ctrl.counts), homref = as.character(geno.ctrl.counts), stringsAsFactors = F)
+  		geno.ctrl.counts$het <- as.character(apply(geno.ctrl, 2, function(x) sum(x == 1)))
+  		geno.ctrl.counts$homalt <- as.character(apply(geno.ctrl, 2, function(x) sum(x == 2)))
+  		
+  		geno.case.counts <- apply(geno.case, 2, function(x) sum(x == 0))
+  		geno.case.counts <- data.frame(variant.id = names(geno.case.counts), homref = as.character(geno.case.counts), stringsAsFactors = F)
+  		geno.case.counts$het <- as.character(apply(geno.case, 2, function(x) sum(x == 1)))
+  		geno.case.counts$homalt <- as.character(apply(geno.case, 2, function(x) sum(x == 2)))
+  		
+  		# get to right format
+  		geno.counts <- data.frame(
+  		  variant.id = geno.ctrl.counts$variant.id, 
+  		  homref = paste0(geno.case.counts$homref, "/", geno.ctrl.counts$homref),
+  		  het = paste0(geno.case.counts$het, "/", geno.ctrl.counts$het),
+  		  homalt = paste0(geno.case.counts$homalt, "/", geno.ctrl.counts$homalt),
+  		  stringsAsFactors = F
+  		)
+  		
+  		rm(geno.ctrl.counts)
+  		rm(geno.case.counts)
+  		rm(geno.ctrl)
+  		rm(geno.case)
+  		
+  		# merge with assoc results
+  		assoc <- merge(assoc, geno.counts, by.x = "id", by.y = "variant.id", all.x = T)
+  		assoc[is.na(assoc)] <- ""
+		}
 	}
 }
 ## save assoc object

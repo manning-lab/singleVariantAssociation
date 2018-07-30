@@ -59,9 +59,6 @@ if (length(assoc.files) == 0){
   assoc.compilation$chr <- as.numeric(as.character(assoc.compilation$chr))
   assoc.compilation$pos <- as.numeric(as.character(assoc.compilation$pos))
   assoc.compilation$P <- as.numeric(as.character(assoc.compilation[,pval]))
-  
-  # Write out the top results
-  fwrite(assoc.compilation[assoc.compilation[,pval] < pval.threshold, ], paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)
 
   # generate the QQ plot (from J Wessel)
   qqpval2 = function(x, ymin, main="", col="black"){
@@ -133,3 +130,16 @@ if (length(assoc.files) == 0){
   # manhattan(assoc.compilation[assoc.compilation$MAF<=0.05,],chr="chr",bp="pos",p="P", main="Variants with MAF<=0.05")
   dev.off()
 }
+
+# subset to just the columns that we want
+cols.tosave <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "MAF", pval, sub("pval","Stat",pval), "homref", "het", "homalt")
+cols.tosave <- cols.tosave[cols.tosave %in% names(assoc.compilation)]
+assoc.compilation <- assoc.compilation[,cols.tosave]
+
+names(assoc.compilation) <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "maf", "pvalue", sub("pval","Stat",pval), "homref", "het", "homalt")
+
+# Write out the top results
+fwrite(assoc.compilation[assoc.compilation[,"pvalue"] < pval.threshold, ], paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)
+
+# write out all results
+write.table(assoc.compilation,paste(label, ".assoc.csv", sep=""),sep=",",row.names=F,quote = FALSE)

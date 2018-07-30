@@ -132,11 +132,11 @@ if (length(assoc.files) == 0){
 }
 
 # subset to just the columns that we want
-cols.tosave <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "MAF", pval, sub("pval","Stat",pval), "homref", "het", "homalt")
+cols.tosave <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "MAF", pval, "n", sub("pval","Stat",pval), "homref", "het", "homalt")
 cols.tosave <- cols.tosave[cols.tosave %in% names(assoc.compilation)]
 assoc.compilation <- assoc.compilation[,cols.tosave]
 
-names(assoc.compilation) <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "maf", "pvalue", sub("pval","Stat",pval), "homref", "het", "homalt")
+names(assoc.compilation) <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "maf", "pvalue", "n", sub("pval","Stat",pval), "homref", "het", "homalt")
 
 # Write out the top results
 fwrite(assoc.compilation[assoc.compilation[,"pvalue"] < pval.threshold, ], paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)

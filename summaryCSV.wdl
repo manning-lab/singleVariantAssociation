@@ -14,7 +14,7 @@ task summaryCSV {
 	runtime {
 		docker: "manninglab/singlevariantassociation:latest"
   	    disks: "local-disk ${disk} SSD"
-        memory: "${memory}G"
+        memory: "${memory} GB"
         bootDiskSizeGb: 20
 	}
 

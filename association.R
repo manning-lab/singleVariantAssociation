@@ -155,14 +155,14 @@ if(sum(gds.mac.filt, na.rm = TRUE)==0) {
   		
   		# get counts per geno
   		geno.ctrl.counts <- apply(geno.ctrl, 2, function(x) sum(x == 0, na.rm = T))
-  		geno.ctrl.counts <- data.frame(variant.id = names(geno.ctrl.counts), homref = as.character(geno.ctrl.counts), stringsAsFactors = F)
-  		geno.ctrl.counts$het <- as.character(apply(geno.ctrl, 2, function(x) sum(x == 1, na.rm = T)))
-  		geno.ctrl.counts$homalt <- as.character(apply(geno.ctrl, 2, function(x) sum(x == 2, na.rm = T)))
+  		geno.ctrl.counts <- data.frame(variant.id = names(geno.ctrl.counts), homref = as.numeric(as.character(geno.ctrl.counts)), stringsAsFactors = F)
+  		geno.ctrl.counts$het <- as.numeric(as.character(apply(geno.ctrl, 2, function(x) sum(x == 1, na.rm = T))))
+  		geno.ctrl.counts$homalt <- as.numeric(as.character(apply(geno.ctrl, 2, function(x) sum(x == 2, na.rm = T))))
   		
   		geno.case.counts <- apply(geno.case, 2, function(x) sum(x == 0, na.rm = T))
-  		geno.case.counts <- data.frame(variant.id = names(geno.case.counts), homref = as.character(geno.case.counts), stringsAsFactors = F)
-  		geno.case.counts$het <- as.character(apply(geno.case, 2, function(x) sum(x == 1, na.rm = T)))
-  		geno.case.counts$homalt <- as.character(apply(geno.case, 2, function(x) sum(x == 2, na.rm = T)))
+  		geno.case.counts <- data.frame(variant.id = names(geno.case.counts), homref = as.numeric(as.character(geno.case.counts)), stringsAsFactors = F)
+  		geno.case.counts$het <- as.numeric(as.character(apply(geno.case, 2, function(x) sum(x == 1, na.rm = T))))
+  		geno.case.counts$homalt <- as.numeric(as.character(apply(geno.case, 2, function(x) sum(x == 2, na.rm = T))))
   		
   		# get to right format
   		geno.counts <- data.frame(

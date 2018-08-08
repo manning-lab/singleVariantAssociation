@@ -124,6 +124,7 @@ The main outputs of the single variant association workflow come from *summary.R
 
 Each of these files have a single row for each variant included (multi-allelics are split with a single row per alternate allele). Each file has a minimum set of columns with a few extra columns that depend on the type of association test performed. The columns that are always present in both output CSV files are:
 
+```
 1. MarkerName: a unique identifier of the variant with the format: `chromosome-position-reference_allele-alternate_allele`, ex: `chr1-123456-A-C` (string)
 2. chr: chromosome of the variant (string)
 3. pos: position of the variant (int)
@@ -133,23 +134,30 @@ Each of these files have a single row for each variant included (multi-allelics 
 7. maf: frequency of `minor.allele` in sample tested for association (float)
 8. pvalue: pvalue generated in association analysis (float)
 9. n: number of samples used in generated association statistics (int)
+```
 
 If the trait of interest is dichotomous:
 
+```
 10. homref.case: number of homozygous reference cases (int)
 11. homref.control: number of homozygous reference controls (int)
 12. het.case: number of heterozygous reference cases (int)
 13. het.control: number of heterozygous reference controls (int)
 14. homalt.case: number of homozygous alternate cases (int)
 15. homalt.control: number of homozygous alternate controls (int)
+```
 
 If the statistical test is the Score test:
 
+```
 16. Score.stat: score statistic of the variant (float)
+```
 
 If the statistical test is the Wald test:
 
-16. Wald.Stat: Wald statistic of the variant (float)
+```
+9. Wald.Stat: Wald statistic of the variant (float)
+```
 
 *summary.R* also produces a PNG file with Manhattan and quantile-quantile plots. Three plots are shown in this image (from top-left):
 

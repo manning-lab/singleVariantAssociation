@@ -165,6 +165,6 @@ If the statistical test is the Wald test:
 2. QQ plot of variants divided into *Common variants* with MAF >= 5% and *Low frequency and rare variants* with MAF < 5%. Genomic control is shown at top left of each plot.
 3. Manhattan plot of all variants with nominal (1e-5) and genomewide (5e-8) significance thresholds in blue and red lines respectively.
 
-
+[Example PNG output](test_inputs/demo_1000_genomes.cov1_association_plots.png)
 
 

@@ -159,16 +159,16 @@ If the statistical test is the Wald test:
 9. Wald.Stat: Wald statistic of the variant (float)
 ```
 
-Below is an example output file using 1000 genomes data and false phenotypes. Note that case/control allele status is only calculated for variants with minor allele frequency < 5% __and__ pvalue > 0.01.
+Below is an example output file using 1000 genomes data and false phenotypes. Note that case/control allele status is only calculated for variants with minor allele frequency < 5% __and__ pvalue > 0.01. (maf, pvalue, and Score.Stat have been truncated for display only)
 
 | MarkerName          | chr | pos | ref | alt | minor.allele | maf | pvalue | n | Score.Stat | homref.case | homref.control | het.case | het.control | homalt.case | homalt.control |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| chr22-16052271-G-A | 22 | 16052271 | G | A | alt | 0.00758785942492013 | 0.0598677318862846 | 2504 | 3.54104500175231 |  |  |  |  |  |  |
-| chr22-16052986-C-A | 22 | 16052986 | C | A | alt | 0.0740814696485623 | 0.00136321342450303 | 2504 | 10.2549092079464 |  |  |  |  |  |  |
-| chr22-16911246-C-T | 22 | 16911246 | C | T | alt | 0.0229632587859425 | 0.00493797826230611 | 2504 | 7.90201415125622 | 485 | 1909 | 11 | 94 | 0 | 5 |
-| chr22-17008128-C-T | 22 | 17008128 | C | T | alt | 0.00219648562300319 | 0.507497926757033 | 2504 | 0.439222569581943 |  |  |  |  |  |  |
-| chr22-17008980-C-T | 22 | 17008980 | C | T | alt | 0.0658945686900958 | 0.753724036726461 | 2504 | 0.0984282285639501 |  |  |  |  |  |  |
-| chr22-17009923-G-C | 22 | 17009923 | G | C | alt | 0.0119808306709265 | 0.00240701549344414 | 2504 | 9.20996306542171 | 475 | 1969 | 21 | 39 | 0 | 0 |
+| chr22-16052271-G-A | 22 | 16052271 | G | A | alt | 0.0075878 | 0.0598677 | 2504 | 3.541045 |  |  |  |  |  |  |
+| chr22-16052986-C-A | 22 | 16052986 | C | A | alt | 0.0740814 | 0.0013632 | 2504 | 10.25490 |  |  |  |  |  |  |
+| chr22-16911246-C-T | 22 | 16911246 | C | T | alt | 0.0229632 | 0.0049379 | 2504 | 7.902014 | 485 | 1909 | 11 | 94 | 0 | 5 |
+| chr22-17008128-C-T | 22 | 17008128 | C | T | alt | 0.0021964 | 0.5074979 | 2504 | 0.439222 |  |  |  |  |  |  |
+| chr22-17008980-C-T | 22 | 17008980 | C | T | alt | 0.0658945 | 0.7537240 | 2504 | 0.098428 |  |  |  |  |  |  |
+| chr22-17009923-G-C | 22 | 17009923 | G | C | alt | 0.0119808 | 0.0024070 | 2504 | 9.209963 | 475 | 1969 | 21 | 39 | 0 | 0 |
 
 
 *summary.R* also produces a PNG file with Manhattan and quantile-quantile plots. Three plots are shown in this image (from top-left):

@@ -159,8 +159,8 @@ If the statistical test is the Wald test:
 9. Wald.Stat: Wald statistic of the variant (float)
 ```
 
-| MarkerName | chr | pos | ref | alt | minor.allele | maf | pvalue | n | Score.Stat | homref.case | homref.control | het.case | het.control | homalt.case | homalt.control |
-| -------------------- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| MarkerName          | chr | pos | ref | alt | minor.allele | maf | pvalue | n | Score.Stat | homref.case | homref.control | het.case | het.control | homalt.case | homalt.control |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | chr22-16052271-G-A | 22 | 16052271 | G | A | alt | 0.00758785942492013 | 0.0598677318862846 | 2504 | 3.54104500175231 |  |  |  |  |  |  |
 | chr22-16052986-C-A | 22 | 16052986 | C | A | alt | 0.0740814696485623 | 0.00136321342450303 | 2504 | 10.2549092079464 |  |  |  |  |  |  |
 | chr22-16911246-C-T | 22 | 16911246 | C | T | alt | 0.0229632587859425 | 0.00493797826230611 | 2504 | 7.90201415125622 | 485 | 1909 | 11 | 94 | 0 | 5 |

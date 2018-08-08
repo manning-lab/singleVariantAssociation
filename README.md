@@ -10,9 +10,9 @@ Also included is a workflow for regenerating the final summary results of the si
 
 This workflow is produced and maintained by the [Manning Lab](https://manning-lab.github.io/). Contributing authors include:
 
-* Tim Majarian (tmajaria@broadinstitute.org)
-* Jasen Jackson (jasenjackson97@gmail.com)
-* Alisa Manning (amanning@broadinstitute.org).
+* Tim Majarian
+* Jasen Jackson
+* Alisa Manning
 
 ## Dependencies
 

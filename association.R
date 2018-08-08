@@ -172,6 +172,17 @@ if(sum(gds.mac.filt, na.rm = TRUE)==0) {
   		  homalt = paste0(geno.case.counts$homalt, "/", geno.ctrl.counts$homalt),
   		  stringsAsFactors = F
   		)
+
+      geno.counts <- data.frame(
+        variant.id = geno.ctrl.counts$variant.id, 
+        homref.case = geno.case.counts$homref,
+        homref.control = geno.ctrl.counts$homref,
+        het.case = geno.case.counts$het,
+        het.control = geno.ctrl.counts$het,
+        homalt.case = geno.case.counts$homalt,
+        homalt.control = geno.ctrl.counts$homalt,
+        stringsAsFactors = F
+      )
   		
   		rm(geno.ctrl.counts)
   		rm(geno.case.counts)

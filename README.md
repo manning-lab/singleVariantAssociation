@@ -108,12 +108,55 @@ Outputs:
 * plots : manhatten and QQ plots (PNG)
 * log_file : log file containing paths to inputs and memory and cpu usage
 
-## Other workflow inputs
+### Other workflow inputs
 
 * this_fitNull_memory : amount of memory in GB for fitNull task (int)
 * this_assocTest_memory : amount of memory in GB for assocTest task (int)
 * this_summary_memory : amount of memory in GB for summary task (int)
 * this_disk : amount of disk space in GB to allot for each execution of a task (int)
+
+## Workflow Outputs
+
+The main outputs of the single variant association workflow come from *summary.R*. Two CSV files are produced:
+
+- All association results - analysis results for every variant tested
+- Top association results - analysis results for only those variants passing a pvalue threshold
+
+Each of these files have a single row for each variant included (multi-allelics are split with a single row per alternate allele). Each file has a minimum set of columns with a few extra columns that depend on the type of association test performed. The columns that are always present in both output CSV files are:
+
+1. MarkerName: a unique identifier of the variant with the format: `chromosome-position-reference_allele-alternate_allele`, ex: `chr1-123456-A-C` (string)
+2. chr: chromosome of the variant (string)
+3. pos: position of the variant (int)
+4. ref: reference allele of the variant as encoded in the input GDS file (string)
+5. alt: alternate allele of the variant as encoded in the input GDS file (string)
+6. minor.allele: allele with lowest MAF, allele tested in association analysis, relevant if a direction of effect is to be considered (string: either `alt` or `ref`)
+7. maf: frequency of `minor.allele` in sample tested for association (float)
+8. pvalue: pvalue generated in association analysis (float)
+9. n: number of samples used in generated association statistics (int)
+
+If the trait of interest is dichotomous:
+
+10. homref.case: number of homozygous reference cases (int)
+11. homref.control: number of homozygous reference controls (int)
+12. het.case: number of heterozygous reference cases (int)
+13. het.control: number of heterozygous reference controls (int)
+14. homalt.case: number of homozygous alternate cases (int)
+15. homalt.control: number of homozygous alternate controls (int)
+
+If the statistical test is the Score test:
+
+16. Score.stat: score statistic of the variant (float)
+
+If the statistical test is the Wald test:
+
+16. Wald.Stat: Wald statistic of the variant (float)
+
+*summary.R* also produces a PNG file with Manhattan and quantile-quantile plots. Three plots are shown in this image (from top-left):
+
+1. QQ plot of all variants
+2. QQ plot of variants divided into *Common variants* with MAF >= 5% and *Low frequency and rare variants* with MAF < 5%. Genomic control is shown at top left of each plot.
+3. Manhattan plot of all variants with nominal (1e-5) and genomewide (5e-8) significance thresholds in blue and red lines respectively.
+
 
 
 

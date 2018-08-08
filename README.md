@@ -159,7 +159,7 @@ If the statistical test is the Wald test:
 9. Wald.Stat: Wald statistic of the variant (float)
 ```
 
-Below is an example output file using 1000 genomes data and false phenotypes. Note that case/control allele status is only calculated for variants with minor allele frequency < 5% __and__ pvalue > 0.01. (maf, pvalue, and Score.Stat have been truncated for display only)
+Below is an example output file using 1000 genomes data and simulated phenotypes. Note that case/control genotype counts is only calculated for variants with minor allele frequency < 5% __and__ pvalue < 0.01. (maf, pvalue, and Score.Stat have been truncated for display only)
 
 | MarkerName          | chr | pos | ref | alt | minor.allele | maf | pvalue | n | Score.Stat | homref.case | homref.control | het.case | het.control | homalt.case | homalt.control |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

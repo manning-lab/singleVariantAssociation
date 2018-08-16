@@ -132,11 +132,23 @@ if (length(assoc.files) == 0){
 }
 
 # subset to just the columns that we want
-cols.tosave <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "MAF", pval, "n", sub("pval","Stat",pval), "homref.case", "homref.control", "het.case", "het.control", "homalt.case", "homalt.control")
+if(pval == "Score.pval") {
+  effect.col <- "Score"
+  effect.col.name <- "Score"
+  se.col <- "Var"
+  se.col.name <- "Var"
+} else if (pval == "Wald.pval") {
+  effect.col <- "Est"
+  effect.col.name <- "Est"
+  se.col <- "SE"
+  se.col.name <- "SE"
+}
+
+cols.tosave <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "MAF", pval, "n", sub("pval","Stat",pval), "homref.case", "homref.control", "het.case", "het.control", "homalt.case", "homalt.control",effect.col,se.col)
 cols.tosave <- cols.tosave[cols.tosave %in% names(assoc.compilation)]
 assoc.compilation <- assoc.compilation[,cols.tosave]
 
-names(assoc.compilation) <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "maf", "pvalue", "n", sub("pval","Stat",pval), "homref.case", "homref.control", "het.case", "het.control", "homalt.case", "homalt.control")
+names(assoc.compilation) <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "maf", "pvalue", "n", sub("pval","Stat",pval), "homref.case", "homref.control", "het.case", "het.control", "homalt.case", "homalt.control",effect.col.name,se.col.name)
 
 # Write out the top results
 fwrite(assoc.compilation[assoc.compilation[,"pvalue"] < pval.threshold, ], paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)

@@ -32,6 +32,7 @@ if (length(assoc.files) == 0){
 
   # Prep for association files
   assoc.compilation <- c() 
+  j <- 1
   
   # Loop through association files
   for (i in seq(1,length(assoc.files))) {
@@ -44,11 +45,12 @@ if (length(assoc.files) == 0){
       assoc$MarkerName <- apply(assoc,1,function(x){paste("chr",sub(" +","",x["chr"]),"-",sub(" +","",x["pos"]),"-",x["ref"],"-",x["alt"],sep="")})
       
       # Write the results out to a master file
-      if (i == 1) {
+      if (j == 1) {
         write.table(assoc,paste(label, ".assoc.csv", sep=""),sep=",",row.names=F,quote = FALSE)
       } else {
         write.table(assoc,paste(label, ".assoc.csv", sep=""),col.names=FALSE,sep=",",row.names=F,quote = FALSE, append=TRUE)
       }	
+      j <- j + 1
     }
   }
   

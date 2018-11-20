@@ -16,7 +16,7 @@
 # 
 # 
 # Author : Tim Majarian tmajaria@broadinstitute.org The Broad Institute
-# The majority of code was derived from Jen Brody's DNANexus app 'genesis_nullmodel'
+# Inspiration from Jen Brody, Stephanie M. Gogarten
 
 input_args <- commandArgs(trailingOnly=T)
 genotype.file <- input_args[1]
@@ -32,12 +32,42 @@ label <- input_args[10]
 kinship.matrix <- input_args[11]
 id.col <- input_args[12]
 
+## Test inputs ##
+setwd("/Users/tmajaria/Documents/projects/public_workflows/singleVariantAssociation/test_inputs/")
+genotype.file <- "1KG_phase3_subset_chrX.gds"
+phenotype.file <- "1KG_phase3_subset.phenotypes.csv"
+outcome.name <- "t2d"
+outcome.type <-  "Dichotomous"
+covariate.string <- "ancestry,sex,last_exam_age,bmi"
+conditional.string <- "NA"
+ivars.string <- "NA"
+group.var <- "NA"
+sample.file <- "1KG_phase3_subset.sampleids.txt"
+label <- "1KG_phase3_subset_chrX"
+kinship.matrix <- "1KG_phase3_subset.grm.RData"
+id.col <- "sample_id"
+
+# BiocManager::install(c("SeqArray","SeqVarTools", "GENESIS", "GWASTools"))
+#################
+
 # Load required libraries
-suppressMessages(library(SeqArray))
-suppressMessages(library(SeqVarTools))
-suppressMessages(library(GENESIS))
 suppressMessages(library(data.table))
+suppressMessages(library(SeqArray))
 suppressMessages(library(GWASTools))
+suppressMessages(library(GENESIS))
+
+# MKL function from topmed DCC pipeline, credit Stephanie M. Gogarten (https://github.com/UW-GAC/analysis_pipeline/blob/a530949a49ed99c4bf24e0531ca8f75ddfbf0ca9/TopmedPipeline/R/countThreads.R)
+countThreads <- function() {
+  nSlots <- Sys.getenv("NSLOTS")
+  nThreads <- ifelse(is.na(strtoi(nSlots) >= 1), 1, strtoi(nSlots))
+  if (nThreads == 0) nThreads <- 1
+  message(paste("Running with", nThreads,"thread(s)."))
+  Sys.setenv(MKL_NUM_THREADS=nThreads)
+  nThreads
+}
+
+# used for MKL
+countThreads()
 
 # Parse the covariate string
 if (covariate.string == "NA"){
@@ -77,13 +107,18 @@ if (!(conditional.string == "NA")) {
 }
 
 ## Load phenotype data
-phenotype.data <- fread(phenotype.file,header=T,stringsAsFactors=FALSE,showProgress=TRUE,data.table=FALSE)
+phenotype.data <- fread(
+  phenotype.file,
+  header = T,
+  stringsAsFactors = F, 
+  data.table = F)
 
+# show the covariants
 print(covariates)
 print(colnames(phenotype.data))
 
 # Correct the outcome column if we have a continuous variable
-if (outcome.type == "continuous"){
+if (tolower(outcome.type) == "continuous"){
   phenotype.data[,outcome.name] <- as.numeric(phenotype.data[,outcome.name])
 }
 
@@ -118,7 +153,13 @@ if (!(sample.file == "NA")){
 # Only keep phenotypes from these samples
 phenotype.slim <- phenotype.slim[phenotype.slim[,id.col] %in% sample.ids,na.omit(all_vals,drop=F)]
 
-# Phenotypes must be in same order in both phenotype file and the genotype file (?)
+# Make row names the sample ids
+row.names(phenotype.slim) <- phenotype.slim[,id.col]
+
+# Correct the column name of the sample ids
+names(phenotype.slim)[names(phenotype.slim) == id.col] <- "scanID"
+
+# Phenotypes must be in same order in both phenotype file and the genotype file
 # Open the genotype file
 genotype.data <- seqOpen(genotype.file)
 
@@ -126,16 +167,16 @@ genotype.data <- seqOpen(genotype.file)
 genotype.ids <- seqGetData(genotype.data, "sample.id")
 
 # Remove any sample phenotypes that are not in the genotype file
-phenotype.slim <- phenotype.slim[phenotype.slim[,id.col] %in% genotype.ids,]
+phenotype.slim <- phenotype.slim[phenotype.slim$scanID %in% genotype.ids,]
 
 # Filter again over the samples in the genotype file
-seqSetFilter(genotype.data,sample.id=phenotype.slim[,id.col])
+seqSetFilter(genotype.data,sample.id=phenotype.slim$scanID)
 
 # Ensure that we have the right order
 genotype.ids <- seqGetData(genotype.data, "sample.id")
 
 # Reorder the phenotype file to match the genotype sample id order
-phenotype.slim <- phenotype.slim[match(genotype.ids,phenotype.slim[,id.col]),,drop=F]
+phenotype.slim <- phenotype.slim[match(genotype.ids,phenotype.slim$scanID),,drop=F]
 
 # Close the genotype file
 seqClose(genotype.data)
@@ -144,43 +185,37 @@ seqClose(genotype.data)
 kinship <- get(load(kinship.matrix))
 
 # Remove any samples from the phenotype file that are not in the relatedness matrix
-phenotype.slim = phenotype.slim[phenotype.slim[,id.col] %in% row.names(kinship),,drop=F]
+phenotype.slim <- phenotype.slim[phenotype.slim$scanID %in% row.names(kinship),,drop=F]
 
 # Remove any samples from the relatedness matrix that are not in the phenotype file
-kinship = kinship[row.names(kinship) %in% phenotype.slim[,id.col],colnames(kinship) %in% phenotype.slim[,id.col]]
+kinship = kinship[row.names(kinship) %in% phenotype.slim$scanID,colnames(kinship) %in% phenotype.slim$scanID]
 
 # Reorder the relatedness matrix to match the phenotype/genotype sample id order
-kinship = kinship[match(phenotype.slim[,id.col],row.names(kinship)),match(phenotype.slim[,id.col],colnames(kinship))]
+kinship = kinship[match(phenotype.slim$scanID,row.names(kinship)),match(phenotype.slim$scanID,colnames(kinship))]
 kinship = as.matrix(kinship)
 
 # Sample data to the correct format for Genesis
-sample.data <- data.frame(scanID = phenotype.slim[,id.col],  
-                          phenotype.slim, 
-                          stringsAsFactors=F)
-scan.annotated.frame <- ScanAnnotationDataFrame(sample.data)
-row.names(phenotype.slim) <- phenotype.slim[,id.col]
-sample.data.for.annotated <- data.frame(sample.id = phenotype.slim[,id.col],
-                                        phenotype.slim,
-                                        stringsAsFactors=F)
-
-# This is the final format
-annotated.frame <- AnnotatedDataFrame(sample.data.for.annotated)
+scan.frame <- ScanAnnotationDataFrame(phenotype.slim)
 
 # Fit the null model
 if (group.var == "NA"){
-  nullmod <- fitNullMM(scanData = scan.annotated.frame,
+  nullmod <- fitNullModel(scan.frame,
                        outcome = outcome.name,
                        covars = covariates,
                        family = ifelse(tolower(outcome.type) == "dichotomous", "binomial", "gaussian"),
-                       covMatList = kinship)
+                       cov.mat = kinship)
 } else {
-  nullmod <- fitNullMM(scanData = scan.annotated.frame,
+  nullmod <- fitNullModel(scan.frame,
                        outcome = outcome.name,
                        covars = covariates,
                        family = "gaussian",
                        group.var = group.var,
-                       covMatList = kinship)
+                       cov.mat = kinship)
 }
 
 # Save the null model to the output file
-save(nullmod,annotated.frame,file=paste(label,"_null.RDa",sep=""))
+save(nullmod,file=paste(label,"_null.RDa",sep=""))
+
+# show memory stats
+ms <- gc()
+print(paste0("memory: ", ms[1,6]+ms[2,6], " mb"))

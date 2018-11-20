@@ -6,20 +6,22 @@
 # label : prefix for output filename (string)
 # assoc.files : comma separated list of association results, output of assocTest (string)
 
-# Check if required packages are installed (sourced from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
-packages <- c("qqman","data.table","stringr")
-to_install <- packages[!(packages %in% installed.packages()[,"Package"])]
-if(length(to_install)) install.packages(to_install,repos='http://cran.us.r-project.org')
-
-# Load packages
-lapply(packages, library, character.only = TRUE)
-
 # Parse inputs
 input_args <- commandArgs(trailingOnly=T)
-pval <- input_args[1]
-pval.threshold <- as.numeric(input_args[2])
-label <- input_args[3]
-assoc.files <- unlist(strsplit(input_args[4],","))
+pval.threshold <- as.numeric(input_args[1])
+label <- input_args[2]
+assoc.files <- unlist(strsplit(input_args[3],","))
+
+## Test inputs ##
+pval.threshold <- "0.05"
+label <- "1KG_phase3_subset"
+assoc.files <- c("1KG_phase3_subset_chrX.assoc.RData")
+#################
+
+# Load packages
+suppressMessages(library(qqman))
+suppressMessages(library(data.table))
+suppressMessages(library(stringr))
 
 # Stop if no assoc files
 if (length(assoc.files) == 0){
@@ -40,9 +42,8 @@ if (length(assoc.files) == 0){
     
     # Check that the file is not empty
     if (!is.na(assoc)[1]){
-      assoc <- assoc[!is.na(assoc[,pval]),]
+      assoc <- assoc[!is.na(assoc$pvalue),]
       print(dim(assoc))
-      assoc$MarkerName <- apply(assoc,1,function(x){paste("chr",sub(" +","",x["chr"]),"-",sub(" +","",x["pos"]),"-",x["ref"],"-",x["alt"],sep="")})
       
       # Write the results out to a master file
       if (j == 1) {
@@ -55,12 +56,15 @@ if (length(assoc.files) == 0){
   }
   
   # Read master file back in
-  assoc.compilation <- fread(paste(label, ".assoc.csv", sep=""),sep=",",header=T,stringsAsFactors=FALSE,showProgress=TRUE,data.table=FALSE)
+  assoc.compilation <- fread(paste(label, ".assoc.csv", sep=""),sep=",",header=T,stringsAsFactors=F,data.table=F)
   
   # Make sure the columns are in the right format
+  assoc.compilation[assoc.compilation$chr == "X", "chr"] <- 23
+  assoc.compilation[assoc.compilation$chr == "Y", "chr"] <- 24
+  assoc.compilation[assoc.compilation$chr == "MT", "chr"] <- 25
   assoc.compilation$chr <- as.numeric(as.character(assoc.compilation$chr))
   assoc.compilation$pos <- as.numeric(as.character(assoc.compilation$pos))
-  assoc.compilation$P <- as.numeric(as.character(assoc.compilation[,pval]))
+  assoc.compilation$pvalue <- as.numeric(as.character(assoc.compilation$pvalue))
 
   # generate the QQ plot (from J Wessel)
   qqpval2 = function(x, ymin, main="", col="black"){
@@ -95,65 +99,24 @@ if (length(assoc.files) == 0){
   # par(mfrow=c(1,2))
   layout(matrix(c(1,2,3,3),nrow=2,byrow = T))
 
-  min.p <- min(assoc.compilation[,pval])
-  qqpval2(assoc.compilation[,pval],col=cols[8],ymin=min.p)
-  legend('topleft',c(paste0('ALL ',lam(assoc.compilation[,pval]))),col=c(cols[8]),pch=c(21))
+  min.p <- min(assoc.compilation$pvalue)
+  qqpval2(assoc.compilation$pvalue,col=cols[8],ymin=min.p)
+  legend('topleft',c(paste0('ALL ',lam(assoc.compilation$pvalue))),col=c(cols[8]),pch=c(21))
   
-  qqpval2(assoc.compilation[assoc.compilation$MAF>=0.05,pval],col=cols[1],ymin=min.p)
+  qqpval2(assoc.compilation[assoc.compilation$maf>=0.05,"pvalue"],col=cols[1],ymin=min.p)
 
-  qqpvalOL(assoc.compilation[assoc.compilation$MAF < 0.05,pval],col=cols[2])
-  legend('topleft',c(paste0('MAF >= 5%  ',lam(assoc.compilation[assoc.compilation$MAF>=0.05,pval])),
-                     paste0('MAF < 5%  ',lam(assoc.compilation[assoc.compilation$MAF < 0.05,pval]))
+  qqpvalOL(assoc.compilation[assoc.compilation$maf < 0.05,"pvalue"],col=cols[2])
+  legend('topleft',c(paste0('MAF >= 5%  ',lam(assoc.compilation[assoc.compilation$maf>=0.05,"pvalue"])),
+                     paste0('MAF < 5%  ',lam(assoc.compilation[assoc.compilation$maf < 0.05,"pvalue"]))
   ),
   col=c(cols[1],cols[2]),pch=c(21,21))
-  
-  # dev.off()
-  # # # Old code
-  # # All variants
-  # qq(assoc.compilation$P,main="All variants")
-  # legend('topleft',c(paste0("GC = ", lam(assoc.compilation$P),'/',lam(assoc.compilation$P,.9))))
-  # 
-  # # Common variants
-  # qq(assoc.compilation$P[assoc.compilation$MAF>0.05],main="Variants with MAF > 5%")
-  # legend('topleft',c(paste0("GC = ", lam(assoc.compilation$P[assoc.compilation$MAF>0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF>0.05],.9))))
-  # 
-  # # Rare/Low frequency variants
-  # qq(assoc.compilation$P[assoc.compilation$MAF<=0.05],main="Variants with MAF <= 5%")
-  # legend('topleft',c(paste0("GC = ",lam(assoc.compilation$P[assoc.compilation$MAF<=0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF<=0.05],.9))))
-  # 
-  # Manhattan plots by maf
-  # All variants
-  manhattan(assoc.compilation,chr="chr",bp="pos",p="P", main="All variants")
-  
-  # # Common variants
-  # manhattan(assoc.compilation[assoc.compilation$MAF>=0.05,],chr="chr",bp="pos",p="P",snp="snpID", col=assoc.compilation[assoc.compilation$MAF>=0.05,]$color, main="Variants with MAF>0.05")
-  # 
-  # # Rare/Low frequency variants
-  # manhattan(assoc.compilation[assoc.compilation$MAF<=0.05,],chr="chr",bp="pos",p="P", main="Variants with MAF<=0.05")
+
+  manhattan(assoc.compilation,chr="chr",bp="pos",p="pvalue", main="All variants")
   dev.off()
 }
 
-# subset to just the columns that we want
-if(pval == "Score.pval") {
-  effect.col <- "Score"
-  effect.col.name <- "Score"
-  se.col <- "Var"
-  se.col.name <- "Var"
-} else if (pval == "Wald.pval") {
-  effect.col <- "Est"
-  effect.col.name <- "Est"
-  se.col <- "SE"
-  se.col.name <- "SE"
-}
-
-cols.tosave <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "MAF", pval, "n", sub("pval","Stat",pval), "homref.case", "homref.control", "het.case", "het.control", "homalt.case", "homalt.control",effect.col,se.col)
-cols.tosave <- cols.tosave[cols.tosave %in% names(assoc.compilation)]
-assoc.compilation <- assoc.compilation[,cols.tosave]
-
-names(assoc.compilation) <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "maf", "pvalue", "n", sub("pval","Stat",pval), "homref.case", "homref.control", "het.case", "het.control", "homalt.case", "homalt.control",effect.col.name,se.col.name)
-
 # Write out the top results
-fwrite(assoc.compilation[assoc.compilation[,"pvalue"] < pval.threshold, ], paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)
+fwrite(assoc.compilation[assoc.compilation[,"pvalue"] < pval.threshold, ], paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE, na = "")
 
 # write out all results
-write.table(assoc.compilation,paste(label, ".assoc.csv", sep=""),sep=",",row.names=F,quote = FALSE)
+fwrite(assoc.compilation,paste(label, ".assoc.csv", sep=""), sep=",", row.names = F, quote = FALSE, na = "")

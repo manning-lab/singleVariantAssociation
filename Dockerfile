@@ -14,4 +14,4 @@ RUN echo "install.packages(c('data.table','qqman','stringr','RColorBrewer','dply
 
 RUN git clone https://github.com/manning-lab/singleVariantAssociation.git && \
 	cd ./singleVariantAssociation && \
-	git pull origin master
+	git pull origin genesis2

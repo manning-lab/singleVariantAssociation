@@ -6,5 +6,5 @@ RUN Rscript -e "install.packages('data.table')"
 
 RUN git clone https://github.com/manning-lab/singleVariantAssociation.git && \
 	cd ./singleVariantAssociation && \
-	git pull origin master && \
-	echo
+	git pull origin genesis2 && \
+	echo r3.5.1

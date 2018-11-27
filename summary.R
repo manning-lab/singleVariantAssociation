@@ -68,7 +68,7 @@ plotQQMH <- function(data, pval, maf, chr, pos, filename) {
 
 top.file <- paste0(label, ".topassoc.csv")
 all.file <- paste0(label, ".assoc.csv")
-png.file <- paste0(label,"_association_plots.pdf")
+png.file <- paste0(label,"_association_plots.png")
 
 # Stop if no assoc files
 if (length(assoc.files) == 0){

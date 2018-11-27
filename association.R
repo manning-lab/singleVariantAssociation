@@ -22,14 +22,14 @@ ivars.string <- input_args[6]
 variant.range.file <- input_args[7]
 
 ## Test inputs ##
-setwd("/Users/tmajaria/Documents/projects/public_workflows/singleVariantAssociation/test_inputs/")
-gds.file <- "1KG_phase3_subset.gds"
-null.file <- "1KG_phase3_subset_null.RDa"
-label <- "1KG_phase3_subset"
-test <- "Score"
-mac <- 20
-ivars.string <- "NA"
-variant.range.file <- "NA"
+# setwd("/Users/tmajaria/Documents/projects/public_workflows/singleVariantAssociation/test_inputs/")
+# gds.file <- "1KG_phase3_subset.gds"
+# null.file <- "1KG_phase3_subset_null.RDa"
+# label <- "1KG_phase3_subset"
+# test <- "Score"
+# mac <- 20
+# ivars.string <- "NA"
+# variant.range.file <- "NA"
 #################
 
 # Load packages

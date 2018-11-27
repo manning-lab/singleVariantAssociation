@@ -13,6 +13,6 @@
   "w_assocTest.this_pval_threshold": 0.9,
   "w_assocTest.this_summary_memory": 5,
   "w_assocTest.this_phenotype_file": "test_inputs/1KG_phase3_subset.phenotypes.csv",
-  "w_assocTest.this_mac": 20,
+  "w_assocTest.this_mac": 10,
   "w_assocTest.this_assocTest_memory": 10
 }

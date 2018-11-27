@@ -1,0 +1,9 @@
+Input files
+label: 1KG_phase3_subset
+assoc: /cromwell-executions/w_assocTest/90e75caa-8fdf-4cf2-8ae0-44958e105a88/call-summary/inputs/519336068/1KG_phase3_subset.assoc.RData
+memory: 5
+disk: 50
+
+[7l----total-cpu-usage---- -dsk/total- ------memory-usage-----
+usr sys idl wai hiq siq| read  writ| used  buff  cach  free
+ 10   3  86   0   0   0| 131k 2027k| 634M  149M 5759M 2427M

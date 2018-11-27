@@ -93,8 +93,8 @@ task assocTest {
 	File? null_file
 	String label
 	String? test
-	String? ivars_string
 	Int? mac
+	String? ivars_string
 	File? variant_range
 
 	Int memory
@@ -135,7 +135,6 @@ task assocTest {
 }
 
 task summary {
-	String pval
 	Float? pval_threshold
 	String label
 	Array[File] assoc
@@ -145,14 +144,13 @@ task summary {
 
 	command {
 		echo "Input files" > summary_out.log
-		echo "pval: ${pval}" >> summary_out.log
 		echo "label: ${label}" >> summary_out.log
 		echo "assoc: ${sep = ',' assoc}" >> summary_out.log
 		echo "memory: ${memory}" >> summary_out.log
 		echo "disk: ${disk}" >> summary_out.log
 		echo "" >> summary_out.log
 		dstat -c -d -m --nocolor 10 1>>summary_out.log &
-		R --vanilla --args ${pval} ${default="0.0001" pval_threshold} ${label} ${sep = ',' assoc} < /singleVariantAssociation/summary.R
+		R --vanilla --args ${default="0.0001" pval_threshold} ${label} ${sep = ',' assoc} < /singleVariantAssociation/summary.R
 	}
 	
 	runtime {

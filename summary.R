@@ -13,9 +13,9 @@ label <- input_args[2]
 assoc.files <- unlist(strsplit(input_args[3],","))
 
 ## Test inputs ##
-pval.threshold <- "0.05"
-label <- "1KG_phase3_subset"
-assoc.files <- c("1KG_phase3_subset_chrX.assoc.RData")
+# pval.threshold <- "0.05"
+# label <- "1KG_phase3_subset"
+# assoc.files <- c("1KG_phase3_subset_chrX.assoc.RData")
 #################
 
 # Load packages

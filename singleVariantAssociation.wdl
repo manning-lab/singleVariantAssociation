@@ -23,7 +23,7 @@ task conditionalPhenotype {
 	}
 
 	runtime {
-		docker: "manninglab/singlevariantassociation:latest"
+		docker: "manninglab/singlevariantassociation:genesis2"
 		disks: "local-disk ${disk} SSD"
 		memory: "10 GB"
 		bootDiskSizeGb: 20
@@ -75,7 +75,7 @@ task fitNull {
 	}
 
 	runtime {
-		docker: "manninglab/singlevariantassociation:latest"
+		docker: "manninglab/singlevariantassociation:genesis2"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory} GB"
 		bootDiskSizeGb: 20
@@ -122,7 +122,7 @@ task assocTest {
 	}
 	
 	runtime {
-		docker: "manninglab/singlevariantassociation:latest"
+		docker: "manninglab/singlevariantassociation:genesis2"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory} GB"
 		bootDiskSizeGb: 20
@@ -154,7 +154,7 @@ task summary {
 	}
 	
 	runtime {
-		docker: "manninglab/singlevariantassociation:latest"
+		docker: "manninglab/singlevariantassociation:genesis2"
   	    disks: "local-disk ${disk} SSD"
         memory: "${memory} GB"
         bootDiskSizeGb: 20
@@ -193,7 +193,6 @@ workflow w_assocTest {
 	File? this_variant_range
 
 	# summary inputs
-	String this_pval
 	Float? this_pval_threshold	
 
 	# inputs to all
@@ -224,7 +223,7 @@ workflow w_assocTest {
 		}
 
 		call summary as summaryConditional {
-			input: pval = this_pval, pval_threshold = this_pval_threshold, label = this_label, assoc = assocTestConditional.assoc, memory = this_summary_memory, disk = this_disk
+			input: pval_threshold = this_pval_threshold, label = this_label, assoc = assocTestConditional.assoc, memory = this_summary_memory, disk = this_disk
 		}
 	}
 
@@ -244,7 +243,7 @@ workflow w_assocTest {
 			}
 
 			call summary {
-				input: pval = this_pval, pval_threshold = this_pval_threshold, label = this_label, assoc = assocTest.assoc, memory = this_summary_memory, disk = this_disk
+				input: pval_threshold = this_pval_threshold, label = this_label, assoc = assocTest.assoc, memory = this_summary_memory, disk = this_disk
 			}
 
 		} 
@@ -259,7 +258,7 @@ workflow w_assocTest {
 			}
 
 			call summary as summaryNull {
-				input: pval = this_pval, pval_threshold = this_pval_threshold, label = this_label, assoc = assocNull.assoc, memory = this_summary_memory, disk = this_disk
+				input: pval_threshold = this_pval_threshold, label = this_label, assoc = assocNull.assoc, memory = this_summary_memory, disk = this_disk
 			}
 		}
 	}

@@ -22,14 +22,14 @@ ivars.string <- input_args[6]
 variant.range.file <- input_args[7]
 
 ## Test inputs ##
-# setwd("/Users/tmajaria/Documents/projects/public_workflows/singleVariantAssociation/test_inputs/")
-# gds.file <- "1KG_phase3_subset_chrX.gds"
-# null.file <- "1KG_phase3_subset_chrX_null.RDa"
-# label <- "1KG_phase3_subset_chrX"
-# test <- "Score"
-# mac <- 20
-# ivars.string <- "NA"
-# variant.range.file <- "NA"
+setwd("/Users/tmajaria/Documents/projects/public_workflows/singleVariantAssociation/test_inputs/")
+gds.file <- "1KG_phase3_subset.gds"
+null.file <- "1KG_phase3_subset_null.RDa"
+label <- "1KG_phase3_subset"
+test <- "Score"
+mac <- 20
+ivars.string <- "NA"
+variant.range.file <- "NA"
 #################
 
 # Load packages
@@ -230,7 +230,7 @@ if(sum(gds.mac.filt, na.rm = TRUE)==0) {
     				rm(geno.case)
     		
     				# merge with assoc results
-    				assoc <- merge(assoc, geno.counts, by.x = "id", by.y = "variant.id", all.x = T)
+    				assoc <- merge(assoc, geno.counts, by.x = "variant.id", by.y = "variant.id", all.x = T)
     				assoc[is.na(assoc)] <- ""
   				}
 			}

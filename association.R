@@ -111,7 +111,7 @@ gds.freq <- seqParallel(TRUE, gds.data, FUN = function(f) {
 }, split = "by.variant")
 seqParallelSetup(FALSE,verbose=F)
 
-gds.maf <- pmin(gds.freq, 1-gds.freq)
+gds.maf <- ifelse(!is.na(gds.freq), pmin(gds.freq, 1-gds.freq), NA)
 gds.mac.filt <- 2 * gds.maf * (1-gds.maf) * length(nullmod$sample.id) >= mac
 
 # If no snps remain, return empty

@@ -40,6 +40,7 @@ suppressMessages(library(SeqVarTools))
 suppressMessages(library(data.table))
 suppressMessages(library(dplyr))
 suppressMessages(library(tidyr))
+suppressMessages(library(Rcpp))
 
 
 
@@ -83,7 +84,33 @@ gds.data <- seqOpen(gds.file)
 
 # Filter by desired MAC
 seqSetFilter(gds.data,sample.id=nullmod$sample.id, action="intersect", verbose=TRUE)
-gds.freq <- seqAlleleFreq(gds.data, .progress=TRUE)
+
+# old, slow way of doing this
+# gds.freq <- seqAlleleFreq(gds.data, .progress=TRUE)
+
+# new, faster way of doing this
+cppFunction("
+    double calc_freq(IntegerVector x)
+            {
+            int len=x.size(), n=0, n0=0;
+            for (int i=0; i < len; i++)
+            {
+            int g = x[i];
+            if (g != NA_INTEGER)
+            {
+            n++;
+            if (g == 0) n0++;
+            }
+            }
+            return double(n0) / n;
+            }")
+
+# seqParallelSetup()
+gds.freq <- seqParallel(TRUE, gds.data, FUN = function(f) {
+  seqApply(f, "genotype", FUN=calc_freq, as.is="double", margin="by.variant")
+}, split = "by.variant")
+seqParallelSetup(FALSE,verbose=F)
+
 gds.maf <- pmin(gds.freq, 1-gds.freq)
 gds.mac.filt <- 2 * gds.maf * (1-gds.maf) * length(nullmod$sample.id) >= mac
 
@@ -138,13 +165,16 @@ if(sum(gds.mac.filt, na.rm = TRUE)==0) {
 			
 			# make iterator for association testing
 			iterator <- SeqVarBlockIterator(gds.geno.data)
-	
+			seqParallelSetup()
+			
 			# Run association test
 			if (ivars.string == "NA"){
 				assoc <- assocTestSingle(iterator, null.model = nullmod, test = test, sparse = FALSE)
 			} else {
 				assoc <- assocTestSingle(iterator, null.model = nullmod, test = test, ivars=unlist(strsplit(ivars.string, ",")), sparse = FALSE)
 			}
+			seqParallelSetup(FALSE)
+			
 			print("Finished Association Step")
 			print(dim(assoc))
 			

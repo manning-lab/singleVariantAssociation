@@ -82,7 +82,7 @@ load(null.file)
 gds.data <- seqOpen(gds.file)
 
 # Filter by desired MAC
-seqSetFilter(gds.data,sample.id=nullmod$scanID, action="intersect", verbose=TRUE)
+seqSetFilter(gds.data,sample.id=nullmod$sample.id, action="intersect", verbose=TRUE)
 gds.freq <- seqAlleleFreq(gds.data, .progress=TRUE)
 gds.maf <- pmin(gds.freq, 1-gds.freq)
 gds.mac.filt <- 2 * gds.maf * (1-gds.maf) * length(nullmod$sample.id) >= mac

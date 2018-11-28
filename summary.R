@@ -14,7 +14,7 @@ assoc.files <- unlist(strsplit(input_args[3],","))
 
 ## Test inputs ##
 # pval.threshold <- "0.05"
-# label <- "1KG_phase3_subset"
+# label <- "testing"
 # assoc.files <- c("1KG_phase3_subset_chrX.assoc.RData")
 #################
 
@@ -44,26 +44,63 @@ qqpval = function(x, main="", col="black"){
 }
 
 plotQQMH <- function(data, pval, maf, chr, pos, filename) {
-  png(filename = filename, width = 12, height = 16, units = "in", res=400)
-  layout(matrix(c(1,2,3,4,4,4,5,5,5,6,6,6),nrow=4,byrow = T))
-  cols <- brewer.pal(8,"Dark2")
-  min.p <- min(data[,pval])
+  # need to check if we have variants to make all of the plots
+  which.plot <- "all"
   
-  qqpval(data[data$maf >= 0.01,pval], main = "MAF>=1%", col=cols[8])
-  legend('topleft',c(paste0('GC = ',lam(data[data$maf >= 0.01,pval]))),col=c(cols[8]),pch=c(21))
+  if (length(data[data$maf < 0.01,pval]) == 0){
+    which.plot <- "single"
+  } else if (length(data[data$maf < 0.01 & data$mac > 20,pval]) == 0 || length(data[data$mac < 20,pval]) == 0) {
+    which.plot <- "double"
+  } else {
+    which.plot <- "all"
+  }
   
-  qqpval(data[data$maf < 0.01 & data$mac > 20,pval], main = "MAF<1% & MAC>20", col=cols[1])
-  legend('topleft',c(paste0('GC = ',lam(data[data$maf < 0.01 & data$mac > 20,pval]))),col=c(cols[8]),pch=c(21))
-  
-  qqpval(data[data$mac <= 20,pval], main = "MAC<=20", col=cols[7])
-  legend('topleft',c(paste0('GC = ',lam(data[data$mac <= 20,pval]))),col=c(cols[7]),pch=c(21))
-  
+  # make sure data types are right
   data$pos <- as.numeric(as.character(data[,pos]))
   data$pval <- as.numeric(data[,pval])
-  manhattan(data[data$maf >= 0.01,],chr=chr, bp=pos, p=pval, main="MAF>=1%")
-  manhattan(data[data$maf < 0.01 & data$mac > 20,],chr=chr, bp=pos, p=pval, main="MAF<1% & MAC>20")
-  manhattan(data[data$mac <= 20,],chr=chr, bp=pos, p=pval, main="MAC<=20")
-  dev.off()
+  cols <- brewer.pal(8,"Dark2")
+  
+  if (which.plot == "single"){
+    png(filename = filename, width = 12, height = 4, units = "in", res=400)
+    layout(matrix(c(1,2,2),nrow=1,byrow = T))
+    
+    qqpval(data[,pval], main = "All variants", col=cols[8])
+    legend('topleft',c(paste0('GC = ',lam(data[,pval]))),col=c(cols[8]),pch=c(21))
+    manhattan(data,chr=chr, bp=pos, p=pval, main="All variants")
+    
+    dev.off()
+    
+  } else if (which.plot == "double"){
+    png(filename = filename, width = 8, height = 12, units = "in", res=400)
+    layout(matrix(c(1,2,3,3,4,4),nrow=3,byrow = T))
+    
+    qqpval(data[data$maf >= 0.01,pval], main = "MAF>=1%", col=cols[8])
+    legend('topleft',c(paste0('GC = ',lam(data[data$maf >= 0.01,pval]))),col=c(cols[8]),pch=c(21))
+    qqpval(data[data$maf < 0.01,pval], main = "MAF<1%", col=cols[1])
+    legend('topleft',c(paste0('GC = ',lam(data[data$maf < 0.01,pval]))),col=c(cols[8]),pch=c(21)) 
+    manhattan(data[data$maf >= 0.01,],chr=chr, bp=pos, p=pval, main="MAF>=1%")
+    manhattan(data[data$maf < 0.01,],chr=chr, bp=pos, p=pval, main="MAF<1% & MAC>20")
+    
+    dev.off()
+    
+  } else if (which.plot == "all"){
+    png(filename = filename, width = 12, height = 16, units = "in", res=400)
+    layout(matrix(c(1,2,3,4,4,4,5,5,5,6,6,6),nrow=4,byrow = T))
+    cols <- brewer.pal(8,"Dark2")
+    
+    qqpval(data[data$maf >= 0.01,pval], main = "MAF>=1%", col=cols[8])
+    legend('topleft',c(paste0('GC = ',lam(data[data$maf >= 0.01,pval]))),col=c(cols[8]),pch=c(21))
+    qqpval(data[data$maf < 0.01 & data$mac > 20,pval], main = "MAF<1% & MAC>20", col=cols[1])
+    legend('topleft',c(paste0('GC = ',lam(data[data$maf < 0.01 & data$mac > 20,pval]))),col=c(cols[8]),pch=c(21)) 
+    qqpval(data[data$mac <= 20,pval], main = "MAC<=20", col=cols[7])
+    legend('topleft',c(paste0('GC = ',lam(data[data$mac <= 20,pval]))),col=c(cols[7]),pch=c(21))
+    manhattan(data[data$maf >= 0.01,],chr=chr, bp=pos, p=pval, main="MAF>=1%")
+    manhattan(data[data$maf < 0.01 & data$mac > 20,],chr=chr, bp=pos, p=pval, main="MAF<1% & MAC>20")
+    manhattan(data[data$mac <= 20,],chr=chr, bp=pos, p=pval, main="MAC<=20")
+    
+    dev.off()
+    
+  }
 }
 
 top.file <- paste0(label, ".topassoc.csv")

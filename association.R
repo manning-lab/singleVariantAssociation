@@ -111,7 +111,7 @@ gds.freq <- seqParallel(TRUE, gds.data, FUN = function(f) {
 }, split = "by.variant")
 seqParallelSetup(FALSE,verbose=F)
 
-gds.freq <- as.numeric(as.character(gds.freq[1:length(gds.freq)]))
+gds.freq <- as.numeric(as.character(gds.freq[1:length(gds.freq)-1]))
 gds.maf <- pmin(gds.freq, 1-gds.freq)
 gds.mac.filt <- 2 * gds.maf * (1-gds.maf) * length(nullmod$sample.id) >= mac
 

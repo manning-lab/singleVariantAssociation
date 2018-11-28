@@ -106,7 +106,7 @@ cppFunction("
             }")
 
 # seqParallelSetup()
-gds.freq <- seqParallel(TRUE, gds.data, FUN = function(f) {
+gds.freq <- seqParallel(4, gds.data, FUN = function(f) {
   seqApply(f, "genotype", FUN=calc_freq, as.is="double", margin="by.variant")
 }, split = "by.variant")
 seqParallelSetup(FALSE,verbose=F)
@@ -166,7 +166,7 @@ if(sum(gds.mac.filt, na.rm = TRUE)==0) {
 			
 			# make iterator for association testing
 			iterator <- SeqVarBlockIterator(gds.geno.data)
-			seqParallelSetup()
+			seqParallelSetup(4)
 			
 			# Run association test
 			if (ivars.string == "NA"){

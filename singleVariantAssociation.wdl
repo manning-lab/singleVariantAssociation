@@ -366,20 +366,20 @@ workflow w_assocTest {
 
 	output {
 		######## fitNull outputs #########
-		File null_model = select_first([this_null_file, fitNullConditional.model, fitNull.model])
-		File null_log = select_first([fitNullConditional.log_file, fitNull.log_file, "null"])
+		File? null_model = select_first([this_null_file, fitNullConditional.model, fitNull.model])
+		File? null_log = select_first([fitNullConditional.log_file, fitNull.log_file, "null"])
 		##################################
 
 		######## assocTest outputs #######
-		Array[File] assoc_raw = select_first([assocTestConditional.assoc, assocTest_need_null.assoc, assocTest_have_null.assoc])
-		Array[File] assoc_log = select_first([assocTestConditional.log_file, assocTest_need_null.log_file, assocTest_have_null.log_file])
+		Array[File]? assoc_raw = select_first([assocTestConditional.assoc, assocTest_need_null.assoc, assocTest_have_null.assoc])
+		Array[File]? assoc_log = select_first([assocTestConditional.log_file, assocTest_need_null.log_file, assocTest_have_null.log_file])
 		##################################
 
 		######## summary outputs #########
-		File all_assoc_csv = select_first([summaryConditional.allassoccsv, summary_need_null.allassoccsv, summary_have_null.allassoccsv])
-		File top_assoc_csv = select_first([summaryConditional.topassoccsv, summary_need_null.topassoccsv, summary_have_null.topassoccsv])
-		File summary_plots = select_first([summaryConditional.plots, summary_need_null.plots, summary_have_null.plots])
-		File summary_log = select_first([summaryConditional.log_file, summary_need_null.log_file, summary_have_null.log_file])
+		File? all_assoc_csv = select_first([summaryConditional.allassoccsv, summary_need_null.allassoccsv, summary_have_null.allassoccsv])
+		File? top_assoc_csv = select_first([summaryConditional.topassoccsv, summary_need_null.topassoccsv, summary_have_null.topassoccsv])
+		File? summary_plots = select_first([summaryConditional.plots, summary_need_null.plots, summary_have_null.plots])
+		File? summary_log = select_first([summaryConditional.log_file, summary_need_null.log_file, summary_have_null.log_file])
 		##################################
 	}
 }

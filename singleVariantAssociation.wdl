@@ -169,11 +169,13 @@ task summary {
 }
 
 workflow w_assocTest {
-	# conditionalPhenotype inputs
+	############# INPUTS ####################
+	###### conditionalPhenotype inputs ######
 	String? these_snps
+	#########################################
 
 
-	# fitNull inputs
+	###### fitNull inputs ###################
 	Array[File] these_genotype_files
 	File? this_phenotype_file
 	String? this_outcome_name
@@ -185,81 +187,199 @@ workflow w_assocTest {
 	String this_label
 	File? this_kinship_matrix
 	String? this_id_col
+	Int this_fitnull_memory
+	#########################################
 	
-	# assocTest inputs
+
+	###### assocTest inputs #################
 	File? this_null_file
 	String? this_test
 	Int? this_mac
 	File? this_variant_range
-
-	# summary inputs
-	Float? this_pval_threshold	
-
-	# inputs to all
-	Int this_fitnull_memory
 	Int this_assocTest_memory
-	Int this_summary_memory
-	Int this_disk
+	#########################################
 
+
+	###### summary inputs ###################
+	Float? this_pval_threshold
+	Int this_summary_memory
+	#########################################
+
+
+	###### inputs to all ####################
+	Int this_disk
+	#########################################
+	#########################################
+
+
+	# Take one genotype file for null model
 	File null_genotype_file = these_genotype_files[0]
 
-	Boolean need_null = defined(this_null_file)
+	# Determine if we need a null model
+	Boolean have_null = defined(this_null_file)
 
+	########### WORKFLOW ####################
+
+	# Run conditional if we need to
 	if(defined(these_snps)) {
 
+		# Generate the new phenotype file
 		call conditionalPhenotype {
-			input: genotype_files = these_genotype_files, phenotype_file = this_phenotype_file, id_col = this_id_col, sample_file = this_sample_file, snps = these_snps, label = this_label, disk = this_disk
+			input: 
+				genotype_files = these_genotype_files, 
+				phenotype_file = this_phenotype_file,
+				id_col = this_id_col,
+				sample_file = this_sample_file,
+				snps = these_snps,
+				label = this_label,
+				disk = this_disk
 		}
 		
+		# Fit the null model
 		call fitNull as fitNullConditional {
-			input: genotype_file = null_genotype_file, phenotype_file = conditionalPhenotype.new_phenotype_file, outcome_name = this_outcome_name, outcome_type = this_outcome_type, covariates_string = this_covariates_string, conditional_string = these_snps, ivars_string = this_ivars_string, group_var = this_group_var, sample_file = this_sample_file, label = this_label, kinship_matrix = this_kinship_matrix, id_col = this_id_col, memory = this_fitnull_memory, disk = this_disk
+			input: 
+				genotype_file = null_genotype_file,
+				phenotype_file = conditionalPhenotype.new_phenotype_file,
+				outcome_name = this_outcome_name,
+				outcome_type = this_outcome_type,
+				covariates_string = this_covariates_string,
+				conditional_string = these_snps,
+				ivars_string = this_ivars_string,
+				group_var = this_group_var,
+				sample_file = this_sample_file,
+				label = this_label,
+				kinship_matrix = this_kinship_matrix,
+				id_col = this_id_col,
+				memory = this_fitnull_memory,
+				disk = this_disk
 		}
 
+		# Run association per genotype file in parallel
 		scatter(this_genotype_file in these_genotype_files) {
-		
 			call assocTest as assocTestConditional {
-				input: gds_file = this_genotype_file, null_file = fitNullConditional.model, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, variant_range = this_variant_range, memory = this_assocTest_memory, disk = this_disk
+				input: 
+					gds_file = this_genotype_file,
+					null_file = fitNullConditional.model,
+					label = this_label,
+					test = this_test,
+					mac = this_mac,
+					ivars_string = this_ivars_string,
+					variant_range = this_variant_range,
+					memory = this_assocTest_memory,
+					disk = this_disk
 			}
 		}
 
+		# Summarize the results into a single csv and png with QQ/MH plots
 		call summary as summaryConditional {
-			input: pval_threshold = this_pval_threshold, label = this_label, assoc = assocTestConditional.assoc, memory = this_summary_memory, disk = this_disk
+			input: 
+				pval_threshold = this_pval_threshold,
+				label = this_label,
+				assoc = assocTestConditional.assoc,
+				memory = this_summary_memory,
+				disk = this_disk
 		}
 	}
 
+	# If we dont need to condition, skip conditionalPhenotype task
 	if (!defined(these_snps)) {
-	
-		if(!need_null) {
+		
+		# Generate a null model if we need it
+		if(!have_null) {
 			
+			# Fit the null model
 			call fitNull {
-				input: genotype_file = null_genotype_file, phenotype_file = this_phenotype_file, outcome_name = this_outcome_name, outcome_type = this_outcome_type, covariates_string = this_covariates_string, conditional_string = these_snps, ivars_string = this_ivars_string, group_var = this_group_var, sample_file = this_sample_file, label = this_label, kinship_matrix = this_kinship_matrix, id_col = this_id_col, memory = this_fitnull_memory, disk = this_disk
+				input: 
+					genotype_file = null_genotype_file,
+					phenotype_file = this_phenotype_file,
+					outcome_name = this_outcome_name,
+					outcome_type = this_outcome_type,
+					covariates_string = this_covariates_string,
+					conditional_string = these_snps,
+					ivars_string = this_ivars_string,
+					group_var = this_group_var,
+					sample_file = this_sample_file,
+					label = this_label,
+					kinship_matrix = this_kinship_matrix,
+					id_col = this_id_col,
+					memory = this_fitnull_memory,
+					disk = this_disk
 			}
 
+			# Run association per genotype file in parallel
 			scatter(this_genotype_file in these_genotype_files) {
-			
-				call assocTest {
-					input: gds_file = this_genotype_file, null_file = fitNull.model, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, variant_range = this_variant_range, memory = this_assocTest_memory, disk = this_disk
+				call assocTest as assocTest_need_null {
+					input: 
+						gds_file = this_genotype_file,
+						null_file = fitNull.model,
+						label = this_label,
+						test = this_test,
+						mac = this_mac,
+						ivars_string = this_ivars_string,
+						variant_range = this_variant_range,
+						memory = this_assocTest_memory,
+						disk = this_disk
 				}
 			}
 
-			call summary {
-				input: pval_threshold = this_pval_threshold, label = this_label, assoc = assocTest.assoc, memory = this_summary_memory, disk = this_disk
+			# Summarize the results into a single csv and png with QQ/MH plots
+			call summary as summary_need_null {
+				input: 
+					pval_threshold = this_pval_threshold,
+					label = this_label,
+					assoc = assocTest_need_null.assoc,
+					memory = this_summary_memory,
+					disk = this_disk
 			}
-
 		} 
 
-		if(need_null) {
+		# If a null model is provided, skip fitNull task
+		if(have_null) {
 
+			# Run association per genotype file in parallel
 			scatter(this_genotype_file in these_genotype_files) {
-			
-				call assocTest as assocNull {
-					input: gds_file = this_genotype_file, null_file = this_null_file, label = this_label, test = this_test, mac = this_mac, ivars_string = this_ivars_string, variant_range = this_variant_range, memory = this_assocTest_memory, disk = this_disk
+				call assocTest as assocTest_have_null {
+					input: 
+						gds_file = this_genotype_file,
+						null_file = this_null_file,
+						label = this_label,
+						test = this_test,
+						mac = this_mac,
+						ivars_string = this_ivars_string,
+						variant_range = this_variant_range,
+						memory = this_assocTest_memory,
+						disk = this_disk
 				}
 			}
 
-			call summary as summaryNull {
-				input: pval_threshold = this_pval_threshold, label = this_label, assoc = assocNull.assoc, memory = this_summary_memory, disk = this_disk
+			# Summarize the results into a single csv and png with QQ/MH plots
+			call summary as summary_have_null {
+				input: 
+					pval_threshold = this_pval_threshold,
+					label = this_label,
+					assoc = assocTest_have_null.assoc,
+					memory = this_summary_memory,
+					disk = this_disk
 			}
 		}
+	}
+
+	output {
+		######## fitNull outputs #########
+		File null_model = select_first([this_null_file, fitNullConditional.model, fitNull.model])
+		File null_log = select_first([fitNullConditional.log_file, fitNull.log_file, "null"])
+		##################################
+
+		######## assocTest outputs #######
+		Array[File] assoc_raw = select_first([assocTestConditional.assoc, assocTest_need_null.assoc, assocTest_have_null.assoc])
+		Array[File] assoc_log = select_first([assocTestConditional.log_file, assocTest_need_null.log_file, assocTest_have_null.log_file])
+		##################################
+
+		######## summary outputs #########
+		File all_assoc_csv = select_first([summaryConditional.allassoccsv, summary_need_null.allassoccsv, summary_have_null.allassoccsv])
+		File top_assoc_csv = select_first([summaryConditional.topassoccsv, summary_need_null.topassoccsv, summary_have_null.topassoccsv])
+		File summary_plots = select_first([summaryConditional.plots, summary_need_null.plots, summary_have_null.plots])
+		File summary_log = select_first([summaryConditional.log_file, summary_need_null.log_file, summary_have_null.log_file])
+		##################################
 	}
 }

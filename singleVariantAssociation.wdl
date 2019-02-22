@@ -218,6 +218,40 @@ workflow w_assocTest {
 	# Determine if we need a null model
 	Boolean have_null = defined(this_null_file)
 
+	########### Metadata ####################
+	parameter_meta {
+	    these_snps: "Comma separated list of SNVs (chr-pos-ref-alt) for conditional analysis [String?]"
+	    these_genotype_files: "Array of genotype files [GDS]"
+	    this_phenotype_file: "Phenotypes for samples to used in analysis [CSV/TSV?]"
+	    this_outcome_name: "Column name in phenotype file specifing the outcome to be used in analysis [String?]"
+	    this_outcome_type: "Type of outcome: Dichotomous/Continuous [String?]"
+	    this_covariates_string: "Comma separated string of column names present in phenotype file to use as covariates [String?]"
+	    this_ivars_string: "Column header to use for interaction variable [String?]"
+	    this_group_var: "Column header to use for heterogenious variance [String?]"
+	    this_sample_file: "File with one sample ID per line, intersected with phenotypes to produce set of samples for analysis [TXT?]"
+	    this_label: "Output prefix [String]"
+	    this_kinship_matrix: "Related matrix to correct for in GWAS [.RData?]"
+	    this_id_col: "Column header in phenotype file defining sample IDs shared with genotype file [String?]"
+	    this_fitnull_memory: "Memory desired for fitting the null model [INT]"
+	    this_null_file: "Null model file if previously generated [.RData?]"
+	    this_test: "Statistical test for GWAS: Score, Wald, Firth [String?]"
+	    this_mac: "Minor allele count minimum to include in analysis [INT?]"
+	    this_variant_range: "Coordinate ranges to filter variants for analysis [TXT?]"
+	    this_assocTest_memory: "Memory for association testing [INT]"
+	    this_pval_threshold: "P-value threshold for outputting top association results [FLOAT?]"
+	    this_summary_memory: "Memory for summary generation [INT]"
+	    this_disk: "Disk to be alloted for every step in analysis [INT]"
+	}
+	
+	meta {
+	    author: "Tim Majarian"
+	    lab: "Manning Lab"
+	    company: "The Broad Institute of MIT and Harvard"
+	    email: "tmajaria@broadinstitute.org"
+	    description: "Thios is a workflow for single variant association analysis using GENESIS in R."
+	}
+
+
 	########### WORKFLOW ####################
 
 	# Run conditional if we need to

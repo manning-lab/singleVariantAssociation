@@ -21,17 +21,6 @@ mac <- as.numeric(input_args[5])
 ivars.string <- input_args[6]
 variant.range.file <- input_args[7]
 
-## Test inputs ##
-# setwd("/Users/tmajaria/Documents/projects/public_workflows/singleVariantAssociation/")
-# gds.file <- "test_inputs/1KG_phase3_subset.gds"
-# null.file <- "test_outputs/1KG_phase3_subset_null.RDa"
-# label <- "1KG_phase3_subset"
-# test <- "Score"
-# mac <- 20
-# ivars.string <- "NA"
-# variant.range.file <- "NA"
-# #################
-
 # Load packages
 suppressMessages(library(GWASTools))
 suppressMessages(library(GENESIS))

@@ -32,24 +32,6 @@ label <- input_args[10]
 kinship.matrix <- input_args[11]
 id.col <- input_args[12]
 
-## Test inputs ##
-# setwd("/Users/tmajaria/Documents/projects/public_workflows/singleVariantAssociation/test_inputs/")
-# genotype.file <- "1KG_phase3_subset_chrX.gds"
-# phenotype.file <- "1KG_phase3_subset.phenotypes.csv"
-# outcome.name <- "t2d"
-# outcome.type <-  "Dichotomous"
-# covariate.string <- "ancestry,sex,last_exam_age,bmi"
-# conditional.string <- "NA"
-# ivars.string <- "NA"
-# group.var <- "NA"
-# sample.file <- "1KG_phase3_subset.sampleids.txt"
-# label <- "1KG_phase3_subset_chrX"
-# kinship.matrix <- "1KG_phase3_subset.grm.RData"
-# id.col <- "sample_id"
-
-# BiocManager::install(c("SeqArray","SeqVarTools", "GENESIS", "GWASTools"))
-#################
-
 # Load required libraries
 suppressMessages(library(data.table))
 suppressMessages(library(SeqArray))

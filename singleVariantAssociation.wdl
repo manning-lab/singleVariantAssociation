@@ -248,7 +248,7 @@ workflow w_assocTest {
 	    lab: "Manning Lab"
 	    company: "The Broad Institute of MIT and Harvard"
 	    email: "tmajaria@broadinstitute.org"
-	    description: "Thios is a workflow for single variant association analysis using GENESIS in R."
+	    description: "This is a workflow for single variant association analysis using GENESIS in R."
 	}
 
 

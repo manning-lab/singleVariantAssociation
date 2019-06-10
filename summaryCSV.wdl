@@ -26,7 +26,7 @@ task summaryCSV {
 }
 
 workflow w_summaryCSV {
-	String this_pval
+	String? this_pval
 	Float? this_pval_threshold
 	String this_label
 	Array[File] these_assoc

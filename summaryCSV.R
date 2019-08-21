@@ -25,6 +25,9 @@ assoc <- fread(assoc.file, data.table = F, stringsAsFactors = F)
 assoc$MarkerName <- apply(assoc,1,function(x){paste("chr",sub(" +","",x["chr"]),"-",sub(" +","",x["pos"]),"-",x["ref"],"-",x["alt"],sep="")})
 
 # Make sure the columns are in the right format
+if (any(assoc$chr == "X")) assoc[assoc$chr == "X", "chr"] <- 23
+if (any(assoc$chr == "Y")) assoc[assoc$chr == "Y", "chr"] <- 24
+if (any(assoc$chr == "M")) assoc[assoc$chr == "M", "chr"] <- 25
 assoc$chr <- as.numeric(as.character(assoc$chr))
 assoc$pos <- as.numeric(as.character(assoc$pos))
 assoc$P <- as.numeric(as.character(assoc[,pval]))

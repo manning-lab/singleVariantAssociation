@@ -23,7 +23,7 @@ task conditionalPhenotype {
 	}
 
 	runtime {
-		docker: "manninglab/singlevariantassociation:genesis2"
+		docker: "manninglab/singlevariantassociation:latest"
 		disks: "local-disk ${disk} SSD"
 		memory: "10 GB"
 		bootDiskSizeGb: 20
@@ -75,7 +75,7 @@ task fitNull {
 	}
 
 	runtime {
-		docker: "manninglab/singlevariantassociation:genesis2"
+		docker: "manninglab/singlevariantassociation:latest"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory} GB"
 		bootDiskSizeGb: 20
@@ -122,7 +122,7 @@ task assocTest {
 	}
 	
 	runtime {
-		docker: "manninglab/singlevariantassociation:genesis2"
+		docker: "manninglab/singlevariantassociation:latest"
 		disks: "local-disk ${disk} SSD"
 		memory: "${memory} GB"
 		bootDiskSizeGb: 20
@@ -154,7 +154,7 @@ task summary {
 	}
 	
 	runtime {
-		docker: "manninglab/singlevariantassociation:genesis2"
+		docker: "manninglab/singlevariantassociation:latest"
   	    disks: "local-disk ${disk} SSD"
         memory: "${memory} GB"
         bootDiskSizeGb: 20

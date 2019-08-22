@@ -6,26 +6,112 @@
 # label : prefix for output filename (string)
 # assoc.files : comma separated list of association results, output of assocTest (string)
 
-# Check if required packages are installed (sourced from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
-packages <- c("qqman","data.table","stringr")
-to_install <- packages[!(packages %in% installed.packages()[,"Package"])]
-if(length(to_install)) install.packages(to_install,repos='http://cran.us.r-project.org')
-
-# Load packages
-lapply(packages, library, character.only = TRUE)
-
 # Parse inputs
 input_args <- commandArgs(trailingOnly=T)
-pval <- input_args[1]
-pval.threshold <- as.numeric(input_args[2])
-label <- input_args[3]
-assoc.files <- unlist(strsplit(input_args[4],","))
+pval.threshold <- as.numeric(input_args[1])
+label <- input_args[2]
+assoc.files <- unlist(strsplit(input_args[3],","))
+
+## Test inputs ##
+# pval.threshold <- "0.05"
+# label <- "testing"
+# assoc.files <- c("1KG_phase3_subset_chrX.assoc.RData")
+#################
+
+# Load packages
+suppressMessages(library(qqman))
+suppressMessages(library(data.table))
+suppressMessages(library(stringr))
+suppressMessages(library(RColorBrewer))
+
+# generate the QQ plot (from AManning, JWessel)
+lam = function(x,p=.5){
+  x = x[!is.na(x)]
+  x.quantile <- quantile(x,p)
+  round((qchisq(1-x.quantile,1)/qchisq(p,1)),2)
+}
+
+qqpval = function(x, main="", col="black"){
+  x<-sort(-log10(x))
+  n<-length(x)
+  for.xaxis <- qexp(ppoints(n))/log(10)
+  plot(x=for.xaxis[seq(round(n*.9),n)], y=x[seq(round(n*.9),n)], 
+       xlab="Expected", ylab="Observed", main=main ,col=col ,cex=.8, bg= col, 
+       pch = 19,
+       xlim=c(1,max(for.xaxis)),
+       ylim=c(1,max(x)),bty="n")
+  abline(0,1, lty=2)
+}
+
+plotQQMH <- function(data, pval, maf, chr, pos, filename) {
+  # need to check if we have variants to make all of the plots
+  which.plot <- "all"
+  
+  if (length(data[data$maf < 0.01,pval]) == 0){
+    which.plot <- "single"
+  } else if (length(data[data$maf < 0.01 & data$mac > 20,pval]) == 0 || length(data[data$mac < 20,pval]) == 0) {
+    which.plot <- "double"
+  } else {
+    which.plot <- "all"
+  }
+  
+  # make sure data types are right
+  data$pos <- as.numeric(as.character(data[,pos]))
+  data$pval <- as.numeric(data[,pval])
+  cols <- brewer.pal(8,"Dark2")
+  
+  if (which.plot == "single"){
+    png(filename = filename, width = 12, height = 4, units = "in", res=400)
+    layout(matrix(c(1,2,2),nrow=1,byrow = T))
+    
+    qqpval(data[,pval], main = "All variants", col=cols[8])
+    legend('topleft',c(paste0('GC = ',lam(data[,pval]))),col=c(cols[8]),pch=c(21))
+    manhattan(data,chr=chr, bp=pos, p=pval, main="All variants")
+    
+    dev.off()
+    
+  } else if (which.plot == "double"){
+    png(filename = filename, width = 8, height = 12, units = "in", res=400)
+    layout(matrix(c(1,2,3,3,4,4),nrow=3,byrow = T))
+    
+    qqpval(data[data$maf >= 0.01,pval], main = "MAF>=1%", col=cols[8])
+    legend('topleft',c(paste0('GC = ',lam(data[data$maf >= 0.01,pval]))),col=c(cols[8]),pch=c(21))
+    qqpval(data[data$maf < 0.01,pval], main = "MAF<1%", col=cols[1])
+    legend('topleft',c(paste0('GC = ',lam(data[data$maf < 0.01,pval]))),col=c(cols[8]),pch=c(21)) 
+    manhattan(data[data$maf >= 0.01,],chr=chr, bp=pos, p=pval, main="MAF>=1%")
+    manhattan(data[data$maf < 0.01,],chr=chr, bp=pos, p=pval, main="MAF<1% & MAC>20")
+    
+    dev.off()
+    
+  } else if (which.plot == "all"){
+    png(filename = filename, width = 12, height = 16, units = "in", res=400)
+    layout(matrix(c(1,2,3,4,4,4,5,5,5,6,6,6),nrow=4,byrow = T))
+    cols <- brewer.pal(8,"Dark2")
+    
+    qqpval(data[data$maf >= 0.01,pval], main = "MAF>=1%", col=cols[8])
+    legend('topleft',c(paste0('GC = ',lam(data[data$maf >= 0.01,pval]))),col=c(cols[8]),pch=c(21))
+    qqpval(data[data$maf < 0.01 & data$mac > 20,pval], main = "MAF<1% & MAC>20", col=cols[1])
+    legend('topleft',c(paste0('GC = ',lam(data[data$maf < 0.01 & data$mac > 20,pval]))),col=c(cols[8]),pch=c(21)) 
+    qqpval(data[data$mac <= 20,pval], main = "MAC<=20", col=cols[7])
+    legend('topleft',c(paste0('GC = ',lam(data[data$mac <= 20,pval]))),col=c(cols[7]),pch=c(21))
+    manhattan(data[data$maf >= 0.01,],chr=chr, bp=pos, p=pval, main="MAF>=1%")
+    manhattan(data[data$maf < 0.01 & data$mac > 20,],chr=chr, bp=pos, p=pval, main="MAF<1% & MAC>20")
+    manhattan(data[data$mac <= 20,],chr=chr, bp=pos, p=pval, main="MAC<=20")
+    
+    dev.off()
+    
+  }
+}
+
+top.file <- paste0(label, ".topassoc.csv")
+all.file <- paste0(label, ".assoc.csv")
+png.file <- paste0(label,"_association_plots.png")
 
 # Stop if no assoc files
 if (length(assoc.files) == 0){
-  fwrite(list(),paste(label, ".assoc.csv", sep=""),sep=",",row.names=F)
-  fwrite(list(), paste(label, ".topassoc.csv", sep=""),row.names=F)
-  pdf(paste(label,"_association_plots.pdf",sep=""),width=8,height=8)
+  fwrite(list(), file = top.file, sep=",", row.names=F)
+  fwrite(list(), file = all.file, sep=",", row.names=F)
+  png(filename = png.file, width = 1, height = 1, units = "in", res=1)
   dev.off()
   
 } else {
@@ -40,120 +126,36 @@ if (length(assoc.files) == 0){
     
     # Check that the file is not empty
     if (!is.na(assoc)[1]){
-      assoc <- assoc[!is.na(assoc[,pval]),]
+      assoc <- assoc[!is.na(assoc$pvalue),]
       print(dim(assoc))
-      assoc$MarkerName <- apply(assoc,1,function(x){paste("chr",sub(" +","",x["chr"]),"-",sub(" +","",x["pos"]),"-",x["ref"],"-",x["alt"],sep="")})
       
       # Write the results out to a master file
       if (j == 1) {
-        write.table(assoc,paste(label, ".assoc.csv", sep=""),sep=",",row.names=F,quote = FALSE)
+        write.table(assoc, all.file, sep=",", row.names=F, quote = FALSE)
       } else {
-        write.table(assoc,paste(label, ".assoc.csv", sep=""),col.names=FALSE,sep=",",row.names=F,quote = FALSE, append=TRUE)
+        write.table(assoc, all.file, col.names=FALSE, sep=",", row.names=F, quote = FALSE, append=TRUE)
       }	
       j <- j + 1
     }
   }
   
   # Read master file back in
-  assoc.compilation <- fread(paste(label, ".assoc.csv", sep=""),sep=",",header=T,stringsAsFactors=FALSE,showProgress=TRUE,data.table=FALSE)
+  assoc.compilation <- fread(all.file, sep=",", header=T, stringsAsFactors=F, data.table=F)
   
   # Make sure the columns are in the right format
+  assoc.compilation[assoc.compilation$chr == "X", "chr"] <- 23
+  assoc.compilation[assoc.compilation$chr == "Y", "chr"] <- 24
+  assoc.compilation[assoc.compilation$chr == "MT", "chr"] <- 25
   assoc.compilation$chr <- as.numeric(as.character(assoc.compilation$chr))
   assoc.compilation$pos <- as.numeric(as.character(assoc.compilation$pos))
-  assoc.compilation$P <- as.numeric(as.character(assoc.compilation[,pval]))
+  assoc.compilation$pvalue <- as.numeric(as.character(assoc.compilation$pvalue))
 
-  # generate the QQ plot (from J Wessel)
-  qqpval2 = function(x, ymin, main="", col="black"){
-    x<-sort(-log(x[x>0],10))
-    n<-length(x)
-    ymax <- -log(ymin,10)
-
-    plot(x=qexp(ppoints(n))/log(10), y=x, xlab="Expected", ylab="Observed", main=main ,col=col ,cex=.8, bg= col, pch = 21, ylim=c(0,ymax))
-    abline(0,1, lty=2)
-  }
-  
-  # QQ without identity line
-  qqpvalOL = function(x, col="blue"){
-    x<-sort(-log(x[x>0],10))
-    n<-length(x)
-    points(x=qexp(ppoints(n))/log(10), y=x, col=col, cex=.8, bg = col, pch = 21)
-  }
-  
-  # get the right colors
-  library(RColorBrewer)
-  cols <- brewer.pal(8,"Dark2")
-  
-  # calculate control
-  lam = function(x,p=.5){
-    x = x[!is.na(x)]
-    chisq <- qchisq(1-x,1)
-    round((quantile(chisq,p)/qchisq(p,1)),2)
-  }
-  
   # QQ plot
-  png(filename = paste(label,"_association_plots.png",sep=""),width = 11, height = 11, units = "in", res=400, type = "cairo")
-  # par(mfrow=c(1,2))
-  layout(matrix(c(1,2,3,3),nrow=2,byrow = T))
-
-  min.p <- min(assoc.compilation[,pval])
-  qqpval2(assoc.compilation[,pval],col=cols[8],ymin=min.p)
-  legend('topleft',c(paste0('ALL ',lam(assoc.compilation[,pval]))),col=c(cols[8]),pch=c(21))
-  
-  qqpval2(assoc.compilation[assoc.compilation$MAF>=0.05,pval],col=cols[1],ymin=min.p)
-
-  qqpvalOL(assoc.compilation[assoc.compilation$MAF < 0.05,pval],col=cols[2])
-  legend('topleft',c(paste0('MAF >= 5%  ',lam(assoc.compilation[assoc.compilation$MAF>=0.05,pval])),
-                     paste0('MAF < 5%  ',lam(assoc.compilation[assoc.compilation$MAF < 0.05,pval]))
-  ),
-  col=c(cols[1],cols[2]),pch=c(21,21))
-  
-  # dev.off()
-  # # # Old code
-  # # All variants
-  # qq(assoc.compilation$P,main="All variants")
-  # legend('topleft',c(paste0("GC = ", lam(assoc.compilation$P),'/',lam(assoc.compilation$P,.9))))
-  # 
-  # # Common variants
-  # qq(assoc.compilation$P[assoc.compilation$MAF>0.05],main="Variants with MAF > 5%")
-  # legend('topleft',c(paste0("GC = ", lam(assoc.compilation$P[assoc.compilation$MAF>0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF>0.05],.9))))
-  # 
-  # # Rare/Low frequency variants
-  # qq(assoc.compilation$P[assoc.compilation$MAF<=0.05],main="Variants with MAF <= 5%")
-  # legend('topleft',c(paste0("GC = ",lam(assoc.compilation$P[assoc.compilation$MAF<=0.05]),'/',lam(assoc.compilation$P[assoc.compilation$MAF<=0.05],.9))))
-  # 
-  # Manhattan plots by maf
-  # All variants
-  manhattan(assoc.compilation,chr="chr",bp="pos",p="P", main="All variants")
-  
-  # # Common variants
-  # manhattan(assoc.compilation[assoc.compilation$MAF>=0.05,],chr="chr",bp="pos",p="P",snp="snpID", col=assoc.compilation[assoc.compilation$MAF>=0.05,]$color, main="Variants with MAF>0.05")
-  # 
-  # # Rare/Low frequency variants
-  # manhattan(assoc.compilation[assoc.compilation$MAF<=0.05,],chr="chr",bp="pos",p="P", main="Variants with MAF<=0.05")
-  dev.off()
+  plotQQMH(assoc.compilation, "pvalue", "maf", "chr", "pos", png.file)
 }
-
-# subset to just the columns that we want
-if(pval == "Score.pval") {
-  effect.col <- "Score"
-  effect.col.name <- "Score"
-  se.col <- "Var"
-  se.col.name <- "Var"
-} else if (pval == "Wald.pval") {
-  effect.col <- "Est"
-  effect.col.name <- "Est"
-  se.col <- "SE"
-  se.col.name <- "SE"
-}
-
-cols.tosave <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "MAF", pval, "n", sub("pval","Stat",pval), "homref.case", "homref.control", "het.case", "het.control", "homalt.case", "homalt.control",effect.col,se.col)
-cols.tosave <- cols.tosave[cols.tosave %in% names(assoc.compilation)]
-assoc.compilation <- assoc.compilation[,cols.tosave]
-
-names(assoc.compilation) <- c("MarkerName", "chr", "pos", "ref", "alt", "minor.allele", "maf", "pvalue", "n", sub("pval","Stat",pval), "homref.case", "homref.control", "het.case", "het.control", "homalt.case", "homalt.control",effect.col.name,se.col.name)
 
 # Write out the top results
-fwrite(assoc.compilation[assoc.compilation[,"pvalue"] < pval.threshold, ], paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)
+fwrite(assoc.compilation[assoc.compilation[,"pvalue"] < pval.threshold, ], top.file, sep=",", row.names = F, quote = FALSE, na = "")
 
 # write out all results
-write.table(assoc.compilation,paste(label, ".assoc.csv", sep=""),sep=",",row.names=F,quote = FALSE)
+fwrite(assoc.compilation, all.file, sep=",", row.names = F, quote = FALSE, na = "")

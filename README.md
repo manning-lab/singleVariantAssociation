@@ -97,7 +97,6 @@ Outputs:
 Generate a summary of association results including quantile-quantile and manhattan plots for variants subseted by minor allele frequency (all variants, maf < 5%, maf >= 5%). Also generates CSV files of all variants and variants with P < pval_threshold.
 
 Inputs:
-* pval : the p-value column in the output of assocTest, this should be the statistical test with ".pval" appended (string, Score -> Score.pval, Wald -> Wald.pval)
 * *pval_threshold* : p-value threshold for the returning top associations, top association output will include only variants with a p-value less than the threshold (float, default = 0.0001)
 * label : prefix for output filename (string)
 * assoc : output of assocTest (Array[RData])
@@ -130,21 +129,22 @@ Each of these files have a single row for each variant included (multi-allelics 
 3. pos: position of the variant (int)
 4. ref: reference allele of the variant as encoded in the input GDS file (string)
 5. alt: alternate allele of the variant as encoded in the input GDS file (string)
-6. minor.allele: allele with lowest MAF, allele tested in association analysis, relevant if a direction of effect is to be considered (string: either `alt` or `ref`)
+6. minor.allele: allele with lower maf between ref and alt
 7. maf: frequency of `minor.allele` in sample tested for association (float)
 8. pvalue: pvalue generated in association analysis (float)
 9. n: number of samples used in generated association statistics (int)
+10. mac: minor allele count
 ```
 
 If the trait of interest is dichotomous:
 
 ```
-10. homref.case: number of homozygous reference cases (int)
-11. homref.control: number of homozygous reference controls (int)
-12. het.case: number of heterozygous reference cases (int)
-13. het.control: number of heterozygous reference controls (int)
-14. homalt.case: number of homozygous alternate cases (int)
-15. homalt.control: number of homozygous alternate controls (int)
+11. homref.case: number of homozygous reference cases (int)
+12. homref.control: number of homozygous reference controls (int)
+13. het.case: number of heterozygous reference cases (int)
+14. het.control: number of heterozygous reference controls (int)
+15. homalt.case: number of homozygous alternate cases (int)
+16. homalt.control: number of homozygous alternate controls (int)
 ```
 
 If the statistical test is the Score test:

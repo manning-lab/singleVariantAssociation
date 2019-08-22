@@ -1,13 +1,5 @@
-# summaryCSV.R
-# Description: Generate a summary of association results including quantile-quantile and manhattan plots for variants subseted by minor allele frequency (all variants, maf < 5%, maf >= 5%). Also generates CSV files of all and the top associated variants.
-# Inputs:
-# pval : the p-value column in the output of assocTest, this should be the statistical test with ".pval" appended (string, Score -> Score.pval, Wald -> Wald.pval)
-# pval.threshold : p-value threshold for the returning top associations, top association output will include only variants with a p-value less than the threshold (float, default = 0.0001)
-# label : prefix for output filename (string)
-# assoc.file : csv
-
 # Check if required packages are installed (sourced from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
-packages <- c("qqman","data.table","stringr")
+packages <- c("qqman","data.table","stringr","RColorBrewer")
 to_install <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(to_install)) install.packages(to_install,repos='http://cran.us.r-project.org')
 
@@ -19,10 +11,16 @@ input_args <- commandArgs(trailingOnly=T)
 pval <- input_args[1]
 pval.threshold <- as.numeric(input_args[2])
 label <- input_args[3]
-assoc.file <- input_args[4]
+assoc.files <- unlist(strsplit(input_args[4], ","))
 
-assoc <- fread(assoc.file, data.table = F, stringsAsFactors = F)
+# load results
+assoc <- do.call(rbind, lapply(assoc.files, fread, data.table = F, stringsAsFactors = F))
 assoc$MarkerName <- apply(assoc,1,function(x){paste("chr",sub(" +","",x["chr"]),"-",sub(" +","",x["pos"]),"-",x["ref"],"-",x["alt"],sep="")})
+
+# get right pval column
+if (pval == "NA"){
+  pval <- names(assoc)[grep("pval",names(assoc))][1]
+}
 
 # Make sure the columns are in the right format
 if (any(assoc$chr == "X")) assoc[assoc$chr == "X", "chr"] <- 23
@@ -32,14 +30,16 @@ assoc$chr <- as.numeric(as.character(assoc$chr))
 assoc$pos <- as.numeric(as.character(assoc$pos))
 assoc$P <- as.numeric(as.character(assoc[,pval]))
 
+# write out all results
+fwrite(assoc, paste0(label, ".all.assoc.csv"), sep=",", row.names = F)
+
 # Write out the top results
 top.assoc <- assoc[assoc[,pval] < pval.threshold, ]
 if (nrow(top.assoc) == 0){
-  fwrite(list(), paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)
+  fwrite(list(), paste0(label, ".top.assoc.csv"), sep=",", row.names = F)
 } else {
-  fwrite(top.assoc, paste(label, ".topassoc.csv", sep=""), sep=",", row.names = F, quote = FALSE)  
+  fwrite(top.assoc, paste0(label, ".top.assoc.csv"), sep=",", row.names = F)  
 }
-
 
 # generate the QQ plot (from J Wessel)
 qqpval2 = function(x, ymin, main="", col="black"){
@@ -59,7 +59,6 @@ qqpvalOL = function(x, col="blue"){
 }
 
 # get the right colors
-library(RColorBrewer)
 cols <- brewer.pal(8,"Dark2")
 
 # calculate control
@@ -70,19 +69,19 @@ lam = function(x,p=.5){
 }
 
 # QQ plot
-png(filename = paste(label,"_association_plots.png",sep=""),width = 11, height = 11, units = "in", res=400, type = "cairo")
-# par(mfrow=c(1,2))
+
+png(filename = paste0(label,".association.plots.png"),width = 11, height = 11, units = "in", res=400, type = "cairo")
 layout(matrix(c(1,2,3,3),nrow=2,byrow = T))
 
 min.p <- min(assoc[,pval])
 qqpval2(assoc[,pval],col=cols[8],ymin=min.p)
 legend('topleft',c(paste0('ALL ',lam(assoc[,pval]))),col=c(cols[8]),pch=c(21))
 
-qqpval2(assoc[assoc$MAF>=0.05,pval],col=cols[1],ymin=min.p)
+qqpval2(assoc[assoc$freq>=0.05,pval],col=cols[1],ymin=min.p)
 
-qqpvalOL(assoc[assoc$MAF < 0.05,pval],col=cols[2])
-legend('topleft',c(paste0('MAF >= 5%  ',lam(assoc[assoc$MAF>=0.05,pval])),
-                   paste0('MAF < 5%  ',lam(assoc[assoc$MAF < 0.05,pval]))
+qqpvalOL(assoc[assoc$freq < 0.05,pval],col=cols[2])
+legend('topleft',c(paste0('MAF >= 5%  ',lam(assoc[assoc$freq>=0.05,pval])),
+                   paste0('MAF < 5%  ',lam(assoc[assoc$freq < 0.05,pval]))
 ),
 col=c(cols[1],cols[2]),pch=c(21,21))
 

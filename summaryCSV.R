@@ -22,6 +22,8 @@ if (pval == "NA"){
   pval <- names(assoc)[grep("pval",names(assoc))][1]
 }
 
+assoc$chr <- sub("chr", "", assoc$chr)
+
 # Make sure the columns are in the right format
 if (any(assoc$chr == "X")) assoc[assoc$chr == "X", "chr"] <- 23
 if (any(assoc$chr == "Y")) assoc[assoc$chr == "Y", "chr"] <- 24
@@ -43,6 +45,7 @@ if (nrow(top.assoc) == 0){
 
 # generate the QQ plot (from J Wessel)
 qqpval2 = function(x, ymin, main="", col="black"){
+  x <- x[!is.na(x)]
   x<-sort(-log(x[x>0],10))
   n<-length(x)
   ymax <- -log(ymin,10)
@@ -53,6 +56,7 @@ qqpval2 = function(x, ymin, main="", col="black"){
 
 # QQ without identity line
 qqpvalOL = function(x, col="blue"){
+  x <- x[!is.na(x)]
   x<-sort(-log(x[x>0],10))
   n<-length(x)
   points(x=qexp(ppoints(n))/log(10), y=x, col=col, cex=.8, bg = col, pch = 21)
@@ -73,7 +77,7 @@ lam = function(x,p=.5){
 png(filename = paste0(label,".association.plots.png"),width = 11, height = 11, units = "in", res=400, type = "cairo")
 layout(matrix(c(1,2,3,3),nrow=2,byrow = T))
 
-min.p <- min(assoc[,pval])
+min.p <- min(assoc[,pval], na.rm = T)
 qqpval2(assoc[,pval],col=cols[8],ymin=min.p)
 legend('topleft',c(paste0('ALL ',lam(assoc[,pval]))),col=c(cols[8]),pch=c(21))
 
@@ -85,6 +89,6 @@ legend('topleft',c(paste0('MAF >= 5%  ',lam(assoc[assoc$freq>=0.05,pval])),
 ),
 col=c(cols[1],cols[2]),pch=c(21,21))
 
-manhattan(assoc,chr="chr",bp="pos",p="P", main="All variants")
+manhattan(assoc[!is.na(assoc[[pval]]),],chr="chr",bp="pos",p="P", main="All variants")
 dev.off()
 

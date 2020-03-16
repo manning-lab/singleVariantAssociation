@@ -32,6 +32,11 @@ assoc$chr <- as.numeric(as.character(assoc$chr))
 assoc$pos <- as.numeric(as.character(assoc$pos))
 assoc$P <- as.numeric(as.character(assoc[,pval]))
 
+# remove 0, NA, or Inf pvalues
+assoc <- assoc[!is.na(assoc[[pval]]),]
+assoc <- assoc[assoc[[pval]] > 0,]
+assoc <- assoc[!is.infinite(assoc[[pval]]),]
+
 # write out all results
 fwrite(assoc, paste0(label, ".all.assoc.csv"), sep=",", row.names = F)
 
